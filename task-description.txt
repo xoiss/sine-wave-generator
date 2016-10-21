@@ -1,0 +1,27 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Objective:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Develop a sinusoid generator, configurable in amplitude, frequency (and
+phase).
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Detailed description:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The oscillator also needs to have some internal state so that it can
+generate a smooth sinusoid across multiple blocks of samples.
+
+The existing oscillator design works well for the most part, although
+issues have been found in the past with very low signal levels,
+resulting in a lot of harmonic distortion. As a result, workarounds had
+to be put in place to make sure we testing doesn’t occur at problematic
+levels.
+
+Challenge is to come up with a sinusoid generation algorithm that
+maintains its integrity at very low amplitude levels.
+
+The algorithm should be suitable for implementation on our DSPs (fixed
+point) – i.e. 16 bits of precision (maximum) for storing of state in
+memory, with up to 22 bits of precision for intermediate arithmetic
+results.
