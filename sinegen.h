@@ -81,11 +81,11 @@ typedef uint16_t    dsp_uint16_t;       /*!< Unsigned integer, 16-bit. */
 
 /**
  * \brief   Returns generator momentary output for each single sample.
- * \param[in]   fo      Generator frequency (Fo), integer positive value expressed in units of 2^Ks Hz, where Ks is the 
- *  sampling rate factor. Here Ks is integer and may be zero, or either positive, or negative. When Ks equals zero, 
+ * \param[in]   fo      Generator frequency (Fo), integer positive value expressed in units of 2^Ks Hz, where Ks is the
+ *  sampling rate factor. Here Ks is integer and may be zero, or either positive, or negative. When Ks equals zero,
  *  Fo is actually expressed in whole Hertz.
  * \return  Momentary amplitude of the generated signal, integer value.
- * \details Function returns integer values in the range from -2^(CI-1) to +2^(CI-1), where CI is the width of the 
+ * \details Function returns integer values in the range from -2^(CI-1) to +2^(CI-1), where CI is the width of the
  *  conventional integer data type used for DSP algorithms, in bits, which corresponds to the range from -Va to +Va,
  *  where Va is the maximum possible amplitude of the generated signal; zero value corresponds to 0.
  * \note    For correct operation Fo must not exceed Fs/2 at least, where Fs is the sampling rate.

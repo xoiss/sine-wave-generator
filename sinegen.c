@@ -46,7 +46,7 @@ typedef uint32_t    dsp_uint22_t;       /*!< Unsigned integer, 22-bit. */
  * \brief   Returns value of sinus given a momentary phase.
  * \param[in]   phi     Momentary phase (Phi), integer value expressed in units of 2*pi/Ns radians, where Ns is the
  *  number of samples per single wave period.
- * \return  Momentary amplitude of the function 2^(WI-1) * sin(Phi), integer value, where WI is the width of the 
+ * \return  Momentary amplitude of the function 2^(WI-1) * sin(Phi), integer value, where WI is the width of the
  *  extended integer data type used for DSP algorithms, in bits.
  * \details Valid values for \p Phi are from (-Ns/2) to (+Ns/2 - 1), where Ns is the number of samples per single wave
  *  period, which corresponds to the range from (-pi) to (+pi - 2*pi/Ns) radians; zero value corresponds to 0 radians.
