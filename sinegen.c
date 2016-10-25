@@ -20,9 +20,8 @@ typedef uint32_t    dsp_uint22_t;       /*!< DSP unsigned integer, 22-bit. */
 
 /**
  * \brief   Returns wave momentary phase increment (dPhi) per single sample depending on the generator frequency (Fo).
- * \param[in]   fo      Generator frequency (Fo), integer value expressed in units of 2^Ks Hz, where Ks is the sampling
- *  rate factor. Here Ks is integer and may be zero, or either positive, or negative. When Ks equals zero, Fo is
- *  actually expressed in whole Hertz.
+ * \param[in]   k_fo    Natural value of k from the expression Fo = (k * F_step), where Fo is the desired frequency to
+ *  be generated, and F_step is the frequency step. Both Fo and Fs are expressed in Hertz.
  * \return  Phase increment, integer value expressed in units of 2*pi/Ps radians, where Ps is the number of samples per
  *  single wave period.
  * \details The following formula is used:\n
@@ -40,7 +39,7 @@ typedef uint32_t    dsp_uint22_t;       /*!< DSP unsigned integer, 22-bit. */
  *  units of 2^Ks Hz; and it does not depend on the sampling rate (Fs), number of samples per single wave period (Ps),
  *  and sampling rate factor (Ks).
  */
-#define PHASE_INC_PER_SAMPLE(fo)    (fo)
+#define PHASE_INC_PER_SAMPLE(k_fo)    (k_fo)
 
 /**
  * \brief   Returns value of sinus given a momentary phase.
@@ -64,11 +63,11 @@ dsp_int22_t sini(const dsp_int16_t phi) {
 }
 
 /* Returns generator momentary output for each single sample. */
-dsp_int16_t geni(const dsp_uint16_t fo) {
+dsp_int16_t geni(const dsp_uint16_t k_fo) {
     static dsp_int16_t phase = 0;       /* Current momentary phase, wrapped, in units of 2*pi/Ps radians. */
     const dsp_int16_t phi = phase;      /* Copy of the current momentary phase for postponed calculations. */
-    const dsp_uint16_t dPhi = PHASE_INC_PER_SAMPLE(fo);     /* Phase increment. */
-    assert(0 < dPhi && dPhi <= PHASE_CODE_SPAN/2);       /* Equivalent to (0 < Fo and Fo <= Ps/2), where Ps == Fs. */
+    const dsp_uint16_t dPhi = PHASE_INC_PER_SAMPLE(k_fo);   /* Phase increment. */
+    assert(0 < dPhi && dPhi <= PHASE_CODE_SPAN/2);          /* Equivalent to (0 < Fo and Fo <= Ps/2), where Ps == Fs. */
     phase += dPhi;
     if (phase > PHASE_CODE_MAX)
         phase -= PHASE_CODE_SPAN;
