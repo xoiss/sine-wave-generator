@@ -1,7 +1,7 @@
 #ifndef SINEGEN_H
 #define SINEGEN_H
 
-#include <stdint.h>
+#include "dspfix.h"
 
 /**
  * \name    Integer data types for external interface to DSP algorithms.
