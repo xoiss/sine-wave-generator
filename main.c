@@ -1,12 +1,13 @@
-#include "sinegen.h"
+#include "fixtrig.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 int main(void) {
-    int i;
-    for (i = 0; i < 65536*2; i++)
-        printf("%i\n", geni(1));
+    uq016_t phi = 0;
+    do {
+        printf("%hu, %li\n", phi, sin_sq021(phi));
+    } while (++phi != 0);
     fflush(stdout);
     return EXIT_SUCCESS;
 }

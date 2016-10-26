@@ -1,3 +1,4 @@
+#if 0
 #include "sinegen.h"
 
 /**
@@ -201,4 +202,8 @@ dsp_int16_t geni(const dsp_uint16_t k_fo) {
     if (phase > PHASE_CODE_MAX)
         phase -= PHASE_CODE_SPAN;
     return sin_i22(phi) >> (DSP_INT22_WIDTH - DSP_INT16_WIDTH);     /* skeleton */
+}
+#endif
+extern int f(void) {
+    return 1;
 }
