@@ -58,10 +58,10 @@ typedef uint32_t    uq022_t;    /*!< UQ0.22 - unsigned fixed point data, no inte
  *  the sign of the fixed point value or filled with zeroes if the value is unsigned.
  */
 /**@{*/
-extern sq021_t sq015_to_sq021(const sq015_t x);     /*!< Converts SQ0.15 value to SQ0.21 data type. */
-extern uq022_t uq016_to_uq022(const uq016_t x);     /*!< Converts UQ0.16 value to UQ0.22 data type. */
-extern sq015_t sq021_to_sq015(const sq021_t x);     /*!< Converts SQ0.21 value to SQ0.15 data type. */
-extern uq016_t uq022_to_uq016(const uq022_t x);     /*!< Converts UQ0.22 value to UQ0.16 data type. */
+extern sq021_t sq021_from_sq015(const sq015_t x);       /*!< Converts SQ0.15 value to SQ0.21 data type. */
+extern uq022_t uq022_from_uq016(const uq016_t x);       /*!< Converts UQ0.16 value to UQ0.22 data type. */
+extern sq015_t sq015_from_sq021(const sq021_t x);       /*!< Converts SQ0.21 value to SQ0.15 data type. */
+extern uq016_t uq016_from_uq022(const uq022_t x);       /*!< Converts UQ0.22 value to UQ0.16 data type. */
 /**@}*/
 
 /**
@@ -83,10 +83,10 @@ extern uq016_t uq022_to_uq016(const uq022_t x);     /*!< Converts UQ0.22 value t
  *  decreasing the resolution by one order of binary magnitude.
  */
 /**@{*/
-extern uq016_t sq015_to_uq016(const sq015_t x);     /*!< Converts SQ0.15 value to UQ0.16 data type. */
-extern sq015_t uq016_to_sq015(const uq016_t x);     /*!< Converts UQ0.16 value to SQ0.15 data type. */
-extern uq022_t sq021_to_uq022(const sq021_t x);     /*!< Converts SQ0.21 value to UQ0.22 data type. */
-extern sq021_t uq022_to_sq021(const uq022_t x);     /*!< Converts UQ0.22 value to SQ0.21 data type. */
+extern uq016_t uq016_from_sq015(const sq015_t x);       /*!< Converts SQ0.15 value to UQ0.16 data type. */
+extern sq015_t sq015_from_uq016(const uq016_t x);       /*!< Converts UQ0.16 value to SQ0.15 data type. */
+extern uq022_t uq022_from_sq021(const sq021_t x);       /*!< Converts SQ0.21 value to UQ0.22 data type. */
+extern sq021_t sq021_from_uq022(const uq022_t x);       /*!< Converts UQ0.22 value to SQ0.21 data type. */
 /**@}*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/

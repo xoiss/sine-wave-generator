@@ -42,52 +42,52 @@
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Converts SQ0.15 value to SQ0.21 data type. */
-sq021_t sq015_to_sq021(const sq015_t x) {
+sq021_t sq021_from_sq015(const sq015_t x) {
     assert(((x & SQ015_SIGN ? ~x : x) & ~SQ015_MASK) == 0);
     return((sq021_t)x << (SQ021_BIT - SQ015_BIT));
 }
 
 /* Converts UQ0.16 value to UQ0.22 data type. */
-uq022_t uq016_to_uq022(const uq016_t x) {
+uq022_t uq022_from_uq016(const uq016_t x) {
     assert((x & ~UQ016_MASK) == 0);
     return((uq022_t)x << (UQ022_BIT - UQ016_BIT));
 }
 
 /* Converts SQ0.21 value to SQ0.15 data type. */
-sq015_t sq021_to_sq015(const sq021_t x) {
+sq015_t sq015_from_sq021(const sq021_t x) {
     assert(((x & SQ021_SIGN ? ~x : x) & ~SQ021_MASK) == 0);
     return(x >> (SQ021_BIT - SQ015_BIT));
 }
 
 /* Converts UQ0.22 value to UQ0.16 data type. */
-uq016_t uq022_to_uq016(const uq022_t x) {
+uq016_t uq016_from_uq022(const uq022_t x) {
     assert((x & ~UQ022_MASK) == 0);
     return(x >> (UQ022_BIT - UQ016_BIT));
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Converts SQ0.15 value to UQ0.16 data type. */
-uq016_t sq015_to_uq016(const sq015_t x) {
+uq016_t uq016_from_sq015(const sq015_t x) {
     assert(((x & SQ015_SIGN ? ~x : x) & ~SQ015_MASK) == 0);
     assert(x >= 0);
     return(x << 1);
 }
 
 /* Converts UQ0.16 value to SQ0.15 data type. */
-sq015_t uq016_to_sq015(const uq016_t x) {
+sq015_t sq015_from_uq016(const uq016_t x) {
     assert((x & ~UQ016_MASK) == 0);
     return(x >> 1);
 }
 
 /* Converts SQ0.21 value to UQ0.22 data type. */
-uq022_t sq021_to_uq022(const sq021_t x) {
+uq022_t uq022_from_sq021(const sq021_t x) {
     assert(((x & SQ021_SIGN ? ~x : x) & ~SQ021_MASK) == 0);
     assert(x >= 0);
     return(x << 1);
 }
 
 /* Converts UQ0.22 value to SQ0.21 data type. */
-sq021_t uq022_to_sq021(const uq022_t x) {
+sq021_t sq021_from_uq022(const uq022_t x) {
     assert((x & ~UQ022_MASK) == 0);
     return(x >> 1);
 }

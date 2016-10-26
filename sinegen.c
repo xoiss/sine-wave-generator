@@ -24,27 +24,6 @@
 #define PHASE_INC_PER_SAMPLE(k_fo)    (k_fo)
 
 /**
- * \brief   Returns the sine given a momentary phase, signed integer 22-bit version.
- * \param[in]   phi     Code of the momentary phase.
- * \return  Code of the momentary amplitude of the function sin(phi).
- * \details Both the \p phi parameter and the returned value use signed integer 22-bit encoding.
- * \details Parameter \p phi must belong to the range [-pi; +pi) radians. The lower boundary is included into, and the 
- *  upper boundary is excluded from the range. Values out of this range cannot be represented within the encoding scheme 
- *  used for the momentary phase and shall be avoided.
- * \details The original encoding scheme of the phase uses signed integer codes having effective width of Pw bits - i.e., in the range
- *  from Pmin = -2^(Pw-1) to Pmax = +2^(Pw-1)-1. The momentary phase code Pmin corresponds to -pi radians; code Pmax+1 
- *  corresponds to +pi radians; code Pmax corresponds to (+pi - 2*pi/Ps) radians; code 0 corresponds to 0 radians, where 
- *  Ps = 2^Pw is the span of the momentary phase integer code. It may also be said that \p phi expresses the phase in 
- *  units of 2*pi/Ps radians. If Pw is less than 22, the higher order bits of the 22-bit signed integer value \p phi 
- *  shall propagate the sign of the original Pw-bits representation of the \p phi.
- * \details The returned value belongs to the range [-1; +1]. Encoding scheme of the returned value uses signed integer 
- *  codes having 22-bits in the subrange from Ymin = -(2^21-1) to Ymax = +(2^21-1); the code -2^21 (represented as 
- *  0x200000) is not used. The momentary amplitude code Ymin corresponds to -1; code Ymax corresponds to +1; code 0 
- *  corresponds to 0. All 22 bits are effectively used.
- */
-static dsp_int22_t sin_i22(const dsp_int22_t phi);
-
-/**
  * \brief   Phase-to-sine lookup table (LUT).
  * \details This table keeps the exact values of the function sin(phi) for the argument phi in the discrete range
  *  [+pi/2; +pi) radians with regular step between knots on the phi axis. The lower boundary is included into, and the
@@ -211,12 +190,6 @@ static const dsp_unt22_t sini_lut[1 << SINE_LUT_RANK] = {
 };
 
 #include <assert.h>
-
-/* Returns the sine given a momentary phase, signed integer 22-bit version. */
-dsp_int22_t sin_i22(const dsp_int22_t phi) {
-    assert(PHASE_CODE_MIN <= phi && phi <= PHASE_CODE_MAX);
-    return phi << (DSP_INT22_WIDTH - DSP_INT16_WIDTH);      /* skeleton */
-}
 
 /* Returns generator momentary output for each single sample. */
 dsp_int16_t geni(const dsp_uint16_t k_fo) {
