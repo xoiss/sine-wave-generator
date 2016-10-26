@@ -8,8 +8,8 @@
  * \brief   Returns the sine given a momentary phase, signed fixed point 0.21-bit version.
  * \param[in]   phi     Normalized momentary phase.
  * \return  Momentary amplitude of the function sin(phi).
- * \details The domain of this function is the set of unsigned fixed point 0.16-bit values - i.e., the discrete range 
- *  [0.0; +1.0-1/2^16] with resolution of 1/2^16. This range corresponds to the floating point range [0; +2*pi) with 
+ * \details The domain of this function is the set of unsigned fixed point 0.16-bit values - i.e., the discrete range
+ *  [0.0; +1.0-1/2^16] with resolution of 1/2^16. This range corresponds to the floating point range [0; +2*pi) with
  *  resolution of pi/2^15 radian. For example:
  *      | real phase     | normalized phase   | container code |
  *      |----------------|--------------------|----------------|
@@ -18,8 +18,8 @@
  *      | pi/2 radian    | 0.25               | 0x4000         |
  *      | pi/2^15 radian | 0.0000152587890625 | 0x0001         |
  *      | 0 radian       | 0.0                | 0x0000         |
- * \details The codomain of this function is the set of signed fixed point 0.21-bit values - i.e., the discrete range 
- *  [-1.0; +1.0-1/2^21] with resolution of 1/2^21. This range corresponds to the floating point range [-1; +1) with 
+ * \details The codomain of this function is the set of signed fixed point 0.21-bit values - i.e., the discrete range
+ *  [-1.0; +1.0-1/2^21] with resolution of 1/2^21. This range corresponds to the floating point range [-1; +1) with
  *  resolution of 1/2^21. For example:
  *      | real amplitude | normalized amplitude     | container code |
  *      |----------------|--------------------------|----------------|

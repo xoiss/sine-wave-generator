@@ -35,17 +35,8 @@ typedef dsp_sq015_t phase_t;
  */
 #define PHASE_CODE_WIDTH    (16)
 
-/**
- * \brief   Rank of the phase-to-sine lookup table (LUT).
- * \details The lookup table rank is defined as the binary logarithm of the number of entries in the lookup table. In
- *  turn, the number of entries in the lookup table shall be a whole power of two.
- * \details The phase-to-sine lookup table rank is used also as the lower boundary for the phase code width.
- * \details In this implementation of DSP algorithms the phase-to-sine lookup table has 1024 entries.
- */
-#define SINE_LUT_RANK       (10)
-
 /* Validate the Pw value. */
-#if !(SINE_LUT_RANK <= (PHASE_CODE_WIDTH - 1) && PHASE_CODE_WIDTH <= DSP_INT16_WIDTH)
+#if !(10 <= (PHASE_CODE_WIDTH - 1) && PHASE_CODE_WIDTH <= DSP_INT16_WIDTH)
 #   error   Value of Pw is out of the valid range.
 #endif
 
