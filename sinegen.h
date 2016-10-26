@@ -4,45 +4,48 @@
 #include "dspfix.h"
 
 /**
- * \name    Integer data types for external interface to DSP algorithms.
- * \note    In the case when a DSP integer data type is represented with a wider data type of the simulator host
- *  platform, the higher order bits of such type are left unused. In the case of unsigned integer the unused bits are
- *  padded with zeroes; and in the case of signed integer the sign bit is propagated through them.
- */
-/**@{*/
-typedef int16_t     dsp_int16_t;        /*!< DSP signed integer, 16-bit. */
-typedef uint16_t    dsp_uint16_t;       /*!< DSP unsigned integer, 16-bit. */
-/**@}*/
-
-/**
- * \brief   Width of the 16-bit integer data type used for external interface to DSP algorithms, in bits.
- * \details DSP algorithms operate externally with 16-bit integer values which are used either as 16-bit unsigned
- *  integers, or 16-bit signed integers with 15 bits used for value and the 16th bit used for the sign.
- */
-#define DSP_INT16_WIDTH     (16)
-
-/**
- * \brief   Width of the integer code representing the momentary phase of the generator, Pw, in bits.
+ * \name    Fixed point data type used for representing the momentary phase of the generator and its effective width.
  * \details The momentary phase of the generator wraps within the range [-pi; +pi) radians. The lower boundary is
  *  included into, and the upper boundary is excluded from the range.
- * \details For needs of DSP algorithms the momentary phase is represented as a signed integer value in the range
- *  from -2^(Pw-1) to +2^(Pw-1)-1.
+ * \details The momentary phase is represented as SQ0.15 signed fixed point value, no integer bits, 15 fractional bits. 
+ *  Its effective width is Pw = 15 bits. The code takes values in the range from -1 to +(1 - 1/2^Pw) with resolution 
+ *  of 1/2^Pw which correspond to the range from -pi to +(pi - pi/2^Pw) with resolution of pi/2^Pw radians.
+
  * \note    The value of Pw must be sufficiently high to achieve the appropriate accuracy, but it must not exceed the
- *  width of the 16-bit integer data type used for external interface to DSP algorithms. Indeed, the lower boundary for
- *  Pw is defined as the binary logarithm of the number of entries in the phase-to-sine lookup table.
+ *  width of the 16-bit integer data type used for external interface to DSP algorithms. Also, the lower boundary for
+ *  Pw-1 is defined as the binary logarithm of the number of entries in the phase-to-sine lookup table.
+
+ * \details The effective width of a fixed point data type is defined as the sum of quantities of all integer M and all 
+ *  fractional N bits. The sign bit (for the case of signed fixed point) is not included in the result.
+
+ */
+/**@{*/
+/** Fixed point data type used for representing the momentary phase of the generator. */
+typedef dsp_sq015_t phase_t;
+/** Effective width of the fixed point data type used for representing the momentary phase of the generator, Pw, in 
+ *  bits. */
+#define PHASE_CODE_WIDTH    (DSP_SQ015_WIDTH)
+/**@}*/
+
+
+
+
+/**
+ * \brief   The effective width of the fixed point code representing the momentary phase of the generator, Pw, in bits.
  */
 #define PHASE_CODE_WIDTH    (16)
 
 /**
  * \brief   Rank of the phase-to-sine lookup table (LUT).
- * \details The lookup table rank is defined as the binary logarithm of the number of entries in the lookup table.
+ * \details The lookup table rank is defined as the binary logarithm of the number of entries in the lookup table. In
+ *  turn, the number of entries in the lookup table shall be a whole power of two.
  * \details The phase-to-sine lookup table rank is used also as the lower boundary for the phase code width.
  * \details In this implementation of DSP algorithms the phase-to-sine lookup table has 1024 entries.
  */
 #define SINE_LUT_RANK       (10)
 
 /* Validate the Pw value. */
-#if !(SINE_LUT_RANK <= PHASE_CODE_WIDTH && PHASE_CODE_WIDTH <= DSP_INT16_WIDTH)
+#if !(SINE_LUT_RANK <= (PHASE_CODE_WIDTH - 1) && PHASE_CODE_WIDTH <= DSP_INT16_WIDTH)
 #   error   Value of Pw is out of the valid range.
 #endif
 
