@@ -3,8 +3,8 @@
  * \brief   Composes a single bit mask having only one given bit selected.
  * \param[in]   nr      Index (starting with 0) of the bit to be selected.
  * \return  The requested bit mask.
- * \note    The \p nr must be less than the number of bits in the native integer data type to avoid the undefined
- *  behavior.
+ * \note    The \p nr must be less than the number of bits in the native integer data type of the host simulator
+ *  platform (32 bits) to avoid the undefined behavior.
  */
 #define BIT(nr)         (1UL << (nr))
 
@@ -12,8 +12,8 @@
  * \brief   Composes a multiple bit mask having the given number of contiguous lower order bits selected.
  * \param[in]   nr      Number of the lower order bits to be selected.
  * \return  The requested bit mask.
- * \note    The \p nr must be less than the number of bits in the native integer data type to avoid the undefined
- *  behavior.
+ * \note    The \p nr must be less than the number of bits in the native integer data type of the host simulator
+ *  platform (32 bits) to avoid the undefined behavior.
  */
 #define BIT_MASK(nr)    (BIT(nr) - 1UL)
 
