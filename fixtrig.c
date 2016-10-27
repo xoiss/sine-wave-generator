@@ -1,16 +1,16 @@
 /*--------------------------------------------------------------------------------------------------------------------*/
-#include "fixtrig.h"
-#include <assert.h>
+/**
+ * \brief   Returns the number of elements in the given array.
+ * \param[in]   x   Identifier of the array variable.
+ * \return  Number of elements.
+ * \note    This macro cannot be used for arrays passed to a function through its parameters list as soon as such
+ *  parameters are considered as pointers by the compiler (namely pointers, but not arrays), and the information about 
+ *  the number of elements is ignored by the compiler even it is explicitly specified in a function declaration.
+ */
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/**
- * \brief   Rank of the phase-to-sine lookup table (LUT).
- * \details The lookup table rank is defined as the binary logarithm of the number of entries in the lookup table. In
- *  turn, the number of entries in the lookup table shall be a whole power of two.
- * \details The phase-to-sine lookup table rank is used also as the lower boundary for the phase code width.
- * \details In this implementation of DSP algorithms the phase-to-sine lookup table has 256 entries.
- */
-#define SIN_LUT_RANK    (8)
+#include "fixtrig.h"
 
 /**
  * \brief   Phase-to-sine lookup table (LUT).
@@ -47,7 +47,7 @@
  * \details The stored value of sin(phi) is encoded as 22-bit unsigned integer value. Value 0 is encoded as 0; value 1
  *  is encoded as 2^22-1; values y in the range (0; 1) are encoded as y * (2^22-1) rounded to the nearest integer.
  */
-static const uq016_t sin_lut[1 << SIN_LUT_RANK] = {
+static const uq016_t sin_lut[] = {
     0xFFFF, 0xFFFE, 0xFFFA, 0xFFF4, 0xFFEB, 0xFFE0, 0xFFD3, 0xFFC3,
     0xFFB0, 0xFF9B, 0xFF84, 0xFF6A, 0xFF4D, 0xFF2F, 0xFF0D, 0xFEEA,
     0xFEC3, 0xFE9B, 0xFE70, 0xFE42, 0xFE12, 0xFDE0, 0xFDAB, 0xFD73,
@@ -83,6 +83,8 @@ static const uq016_t sin_lut[1 << SIN_LUT_RANK] = {
 };
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+#include <assert.h>
+
 /* Returns the sine given a momentary phase, signed fixed point 0.21-bit version. */
 sq021_t sin_sq021(const uq016_t phi) {
     return sq021_from_uq022(uq022_from_uq016(phi));     /* skeleton */
