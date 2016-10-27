@@ -2,16 +2,28 @@
 #define FIXTYPES_H
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-#include <stdint.h>
-
-/**
- * \name    Fixed point data types.
- * \details The following notation is used for fixed point data types:\n
+/**\name    Widths of binary representations of fixed point data types, in bits.
+ * \details The following notation is used for fixed point data types:
  *  - SQm.n - signed fixed point value having 1 sign bit, m integer bits, and n fractional bits
  *  - UQm.n - unsigned fixed point value having no sign bit, m integer bits, and n fractional bits
  *
  * \note    The accepted notation does not include the sign bit into the m value. Only the number of integer bits is
  *  included.
+ * \details The total number of bits in a fixed point value binary representation, the width, equals to (1+m+n) for
+ *  signed and (0+m+n) for unsigned data types, where 1 stays for the sign bit in the case of signed data type, 0 means
+ *  absence of the sign bit in the case of unsigned data type, m and n denote numbers of integer and fractional bits
+ *  respectively.
+ */
+/**@{*/
+#define SQ015_BIT   (1+0+15)    /*!< Width of SQ0.15 data type. */
+#define UQ016_BIT   (0+0+16)    /*!< Width of UQ0.16 data type. */
+#define SQ021_BIT   (1+0+21)    /*!< Width of SQ0.21 data type. */
+#define UQ022_BIT   (0+0+22)    /*!< Width of UQ0.22 data type. */
+/**@}*/
+
+#include <stdint.h>
+
+/**\name    Fixed point data types.
  * \details Signed fixed point SQm.n represents values in the discrete range [-2^m; +2^m-1/2^n] with resolution of
  *  1/2^n. Unsigned fixed point UQm.n represents values in the discrete range [0; +2^m-1/2^n] with resolution of 1/2^n.
  * \details Fixed point data types are emulated with the host platform integer data types of appropriate width and
@@ -29,23 +41,8 @@ typedef int32_t     sq021_t;    /*!< SQ0.21 - signed fixed point data, no intege
 typedef uint32_t    uq022_t;    /*!< UQ0.22 - unsigned fixed point data, no integer bits, 22 fractional bits. */
 /**@}*/
 
-/**
- * \name    Widths of binary representations of fixed point data types, in bits.
- * \details The total number of bits in a fixed point value binary representation, the width, equals to (1+m+n) for
- *  signed and (0+m+n) for unsigned data types, where 1 stays for the sign bit in the case of signed data type, 0 means
- *  absence of the sign bit in the case of unsigned data type, m and n denote numbers of integer and fractional bits
- *  respectively.
- */
-/**@{*/
-#define SQ015_BIT   (1+0+15)    /*!< Width of SQ0.15 data type. */
-#define UQ016_BIT   (0+0+16)    /*!< Width of UQ0.16 data type. */
-#define SQ021_BIT   (1+0+21)    /*!< Width of SQ0.21 data type. */
-#define UQ022_BIT   (0+0+22)    /*!< Width of UQ0.22 data type. */
-/**@}*/
-
 /*--------------------------------------------------------------------------------------------------------------------*/
-/**
- * \name    Functions converting fixed point values between data types of different widths preserving the signedness.
+/**\name    Functions converting fixed point values between data types of different widths preserving the signedness.
  * \param[in]   x   Fixed point value to be converted.
  * \return  Fixed point value in the new data format.
  * \details When a fixed point value, signed or unsigned, of width W0 is extended to a wider width W1 preserving the
@@ -64,8 +61,7 @@ extern sq015_t sq015_from_sq021(const sq021_t x);       /*!< Converts SQ0.21 val
 extern uq016_t uq016_from_uq022(const uq022_t x);       /*!< Converts UQ0.22 value to UQ0.16 data type. */
 /**@}*/
 
-/**
- * \name    Functions converting signed and unsigned fixed point values to each other preserving the width.
+/**\name    Functions converting signed and unsigned fixed point values to each other preserving the width.
  * \param[in]   x   Fixed point value to be converted.
  * \return  Fixed point value in the new data format.
  * \details These functions either remove the sign bit, when converting a signed value to corresponding unsigned data
