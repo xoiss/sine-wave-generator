@@ -15,18 +15,18 @@
  * \details This table keeps the exact values of the function sin(phi) for the argument phi in the discrete range
  *  [0; pi/2) radians with regular step between knots on the phi axis. The table has only one column for the value of
  *  sin(phi) and 256 records each corresponding to one of the allowed phi values.
- * \details The domain of this table is the set of unsigned 8-bit integer values - i.e., the discrete range [0; 255].
- *  This range corresponds to the floating point range [0; pi/2) with resolution of pi/512 radian. For example:
- *  | phi, radian   | fixed point value | container code | 8-bit integer value |
- *  |---------------|-------------------|----------------|---------------------|
- *  | 0             | 0.0               | 0x0000         | 0                   |
- *  | pi/512        | 0.0009765625      | 0x0040         | 1                   |
- *  | pi/4          | 0.125             | 0x2000         | 128                 |
- *  | pi/2 - pi/512 | 0.2490234375      | 0x3FC0         | 255                 |
- *  | pi/2          | not allowed       | not allowed    | not allowed         |
- * \details To obtain the unsigned 8-bit integer value of the index into the table given the fixed point \p phi value,
- *  the following formula shall be used:
- *  - index = phi.code / 64, where:
+ * \details The domain of this table is the set of unsigned 8-bit integer keys - i.e., the discrete range [0; 255]. This
+ *  range corresponds to the floating point range [0; pi/2) with resolution of pi/512 radian. For example:
+ *  | phi, radian   | fixed point value | container code | 8-bit integer key |
+ *  |---------------|-------------------|----------------|-------------------|
+ *  | 0             | 0.0               | 0x0000         | 0                 |
+ *  | pi/512        | 0.0009765625      | 0x0040         | 1                 |
+ *  | pi/4          | 0.125             | 0x2000         | 128               |
+ *  | pi/2 - pi/512 | 0.2490234375      | 0x3FC0         | 255               |
+ *  | pi/2          | not allowed       | not allowed    | not allowed       |
+ * \details To obtain the unsigned 8-bit integer key which may be used as the index into the table given the fixed point
+ *  \p phi value, the following formula shall be used:
+ *  - key = phi.code / 64, where:
  *  - phi.code is the unsigned integer 16-bit container code of the fixed point value of \p phi. Note that as soon as
  *      \p phi belongs to the range [0.0; 0.25), which corresponds to [0; pi/2) radians, the phi.code belongs to the
  *      range [0x0000; 0x3FFF]
@@ -91,11 +91,49 @@ static const uq016_t sin_lut[] = {
 };
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-#include <assert.h>
-
 /* Returns the sine given a momentary phase, signed fixed point 0.21-bit version. */
 sq021_t sin_sq021(const uq016_t phi) {
-    return sq021_from_uq022(uq022_from_uq016(phi));     /* skeleton */
+
+    /* Process cases phi = pi/2 and pi = 3*pi/2 which are not covered by the LUT. */
+    #define _PI_2   (0x4000)        /* pi/2 radian, encoded as 0.25 unsigned fixed point. */
+    #define _PI     (0x8000)        /* pi radian, encoded as 0.5 unsigned fixed point. */
+    #define _3_PI_2 (0xC000)        /* 3*pi/2 radian, encoded as 0.75 unsigned fixed point. */
+    #define _1      (0x200000)      /* Values +1 and -1, both encoded as -1.0 signed fixed point. */
+    if (phi == _PI_2 || phi == _3_PI_2)
+        return _1;
+
+    /* Bring phi to the first quadrant. */
+    uq016_t phi1 = phi;     /* Value of phi brought into the first quadrant. */
+    char negate = 0;        /* 1 if need to inverse the sign of sin(phi) taken from the LUT. */
+    if (phi >= _PI) {
+        phi1 -= _PI;
+        negate = 1;
+    }
+    if (phi_ > _PI_2)
+        phi1 = _PI - phi1;
+
+    /* Obtain the key pair for the LUT and the linear interpolation coefficient. */
+    #define _PHI_RANK   (1 << (UQ016_BIT - 2))      /* Number of different phi values in the first quadrant. */
+    #define _LUT_RANK   (ARRAY_SIZE(sin_lut))       /* Number of entries in the LUT. */
+    #define _COEF_RANK  (_PHI_RANK / _LUT_RANK)     /* Number of different phi values between adjacent LUT entries. */
+    #define _COEF_MASK  (_COEF_RANK - 1)            /* Bit mask for linear interpolation coefficient. */
+    const ... coef = phi1 & _COEF_MASK;             /* Linear interpolation coefficient. */
+    const size_t key0 = phi1 >> _COEF_RANK;         /* Left side key into the LUT. */
+    const size_t key1 = key0 + 1;                   /* Right side key into the LUT. */
+
+    /* Perform linear interpolation over the LUT. */
+    
+
+
+// introduce the LUT rank
+// introduce -1.0 as the possible code for +1.0
+    #undef _PI_2
+    #undef _PI  
+    #undef _3_PI_2
+    #undef _1     
+    #undef _PHI_RANK
+    #undef _LUT_RANK
+    #undef _COEF_RANK
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
