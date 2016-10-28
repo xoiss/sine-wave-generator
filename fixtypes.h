@@ -2,30 +2,25 @@
 #define FIXTYPES_H
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/**\name    Widths of binary representations of fixed point data types, in bits.
+#include <stdint.h>
+
+/**\name    Fixed point data types.
  * \details The following notation is used for fixed point data types:
  *  - SQm.n - signed fixed point value having 1 sign bit, m integer bits, and n fractional bits
  *  - UQm.n - unsigned fixed point value having no sign bit, m integer bits, and n fractional bits
  *
  * \note    The accepted notation does not include the sign bit into the m value. Only the number of integer bits is
- *  included.
- * \details The total number of bits in a fixed point value binary representation, the width, equals to (1+m+n) for
- *  signed and (0+m+n) for unsigned data types, where 1 stays for the sign bit in the case of signed data type, 0 means
- *  absence of the sign bit in the case of unsigned data type, m and n denote numbers of integer and fractional bits
- *  respectively.
- */
-/**@{*/
-#define SQ015_BIT   (1+0+15)    /*!< Width of SQ0.15 data type. */
-#define UQ016_BIT   (0+0+16)    /*!< Width of UQ0.16 data type. */
-#define SQ021_BIT   (1+0+21)    /*!< Width of SQ0.21 data type. */
-#define UQ022_BIT   (0+0+22)    /*!< Width of UQ0.22 data type. */
-/**@}*/
-
-#include <stdint.h>
-
-/**\name    Fixed point data types.
+ *  included in m.
  * \details Signed fixed point SQm.n represents values in the discrete range [-2^m; +2^m-1/2^n] with resolution of
- *  1/2^n. Unsigned fixed point UQm.n represents values in the discrete range [0; +2^m-1/2^n] with resolution of 1/2^n.
+ *  1/2^n. Unsigned fixed point UQm.n represents values in the discrete range [0; 2^m-1/2^n] with resolution of 1/2^n.
+ * \note    When it is necessary to represent the signed +2^m or unsigned 2^m values which are out of the domain of
+ *  data types SQm.n and UQm.n, in particular cases it is allowed to use values -2^m and 0 respectively for them. The
+ *  information on which value is actually implied: +2^m or -2^m, and 2^m or 0 - shall be provided by external means.
+ *  Note that type conversion and other fixed point data processing functions cannot treat such shuffle properly if they
+ *  were not intentionally designed to support this. Also the SQ(m+1).(n-1) and UQ(m+1).(n-1) data types may be used
+ *  instead if it is allowed to reduce the resolution; or SQ(m+1).n and UQ(m+1).n if it is possible to increase the
+ *  width of the fixed point data type; or UQ(m+1).n may be used instead of SQm.n if negative values are treated
+ *  separately.
  * \details Fixed point data types are emulated with the host platform integer data types of appropriate width and
  *  signedness. They are used as containers for fixed point values.
  * \note    When a fixed point data type is actually represented with an integer container data type of the emulator
@@ -38,7 +33,33 @@
 typedef int16_t     sq015_t;    /*!< SQ0.15 - signed fixed point data, no integer bits, 15 fractional bits. */
 typedef uint16_t    uq016_t;    /*!< UQ0.16 - unsigned fixed point data, no integer bits, 16 fractional bits. */
 typedef int32_t     sq021_t;    /*!< SQ0.21 - signed fixed point data, no integer bits, 21 fractional bits. */
+typedef uint32_t    uq121_t;    /*!< UQ1.21 - unsigned fixed point data, 1 integer bit, 21 fractional bits. */
 typedef uint32_t    uq022_t;    /*!< UQ0.22 - unsigned fixed point data, no integer bits, 22 fractional bits. */
+/**@}*/
+
+/**\name    Widths of binary representations of fixed point data types, in bits.
+ * \details The total number of bits in a fixed point value binary representation, the width, equals to (1+m+n) for
+ *  signed and (0+m+n) for unsigned data types, where 1 stays for the sign bit in the case of signed data type, 0 means
+ *  absence of the sign bit in the case of unsigned data type, m and n denote numbers of integer and fractional bits
+ *  respectively.
+ */
+/**@{*/
+#define SQ015_BIT   (1+0+15)    /*!< Full width of SQ0.15 data type. */
+#define UQ016_BIT   (0+0+16)    /*!< Full width of UQ0.16 data type. */
+#define SQ021_BIT   (1+0+21)    /*!< Full width of SQ0.21 data type. */
+#define UQ121_BIT   (0+1+21)    /*!< Full width of UQ1.21 data type. */
+#define UQ022_BIT   (0+0+22)    /*!< Full width of UQ0.22 data type. */
+/**@}*/
+
+/**\name    Widths of fractional parts of binary representations of fixed point data types, in bits.
+ * \details The number of fractional bits is specified with the n in the data type name.
+ */
+/**@{*/
+#define SQ015_FRAC  (15)        /*!< Width of fractional part of SQ0.15 data type. */
+#define UQ016_FRAC  (16)        /*!< Width of fractional part of UQ0.16 data type. */
+#define SQ021_FRAC  (21)        /*!< Width of fractional part of SQ0.21 data type. */
+#define UQ121_FRAC  (21)        /*!< Width of fractional part of UQ1.21 data type. */
+#define UQ022_FRAC  (22)        /*!< Width of fractional part of UQ0.22 data type. */
 /**@}*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -56,6 +77,7 @@ typedef uint32_t    uq022_t;    /*!< UQ0.22 - unsigned fixed point data, no inte
  */
 /**@{*/
 extern sq021_t sq021_from_sq015(const sq015_t x);       /*!< Converts SQ0.15 value to SQ0.21 data type. */
+extern uq121_t uq121_from_uq016(const uq016_t x);       /*!< Converts UQ0.16 value to UQ1.21 data type. */
 extern uq022_t uq022_from_uq016(const uq016_t x);       /*!< Converts UQ0.16 value to UQ0.22 data type. */
 extern sq015_t sq015_from_sq021(const sq021_t x);       /*!< Converts SQ0.21 value to SQ0.15 data type. */
 extern uq016_t uq016_from_uq022(const uq022_t x);       /*!< Converts UQ0.22 value to UQ0.16 data type. */

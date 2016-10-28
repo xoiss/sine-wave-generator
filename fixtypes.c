@@ -41,6 +41,7 @@
 #define SQ015_MASK      (BIT_MASK(SQ015_BIT))       /*!< Bit mask for effective bits of the SQ0.15 data type. */
 #define UQ016_MASK      (BIT_MASK(UQ016_BIT))       /*!< Bit mask for effective bits of the UQ0.16 data type. */
 #define SQ021_MASK      (BIT_MASK(SQ021_BIT))       /*!< Bit mask for effective bits of the SQ0.21 data type. */
+#define UQ121_MASK      (BIT_MASK(UQ121_BIT))       /*!< Bit mask for effective bits of the UQ1.21 data type. */
 #define UQ022_MASK      (BIT_MASK(UQ022_BIT))       /*!< Bit mask for effective bits of the UQ0.22 data type. */
 /**@}*/
 
@@ -52,25 +53,31 @@
 /* Converts SQ0.15 value to SQ0.21 data type. */
 sq021_t sq021_from_sq015(const sq015_t x) {
     assert(((x & SQ015_SIGN ? ~x : x) & ~SQ015_MASK) == 0);
-    return((sq021_t)x << (SQ021_BIT - SQ015_BIT));
+    return((sq021_t)x << (SQ021_FRAC - SQ015_FRAC));
+}
+
+/* Converts UQ0.16 value to UQ1.21 data type. */
+uq121_t uq121_from_uq016(const uq016_t x) {
+    assert((x & ~UQ016_MASK) == 0);
+    return((uq121_t)x << (UQ121_FRAC - UQ016_FRAC));
 }
 
 /* Converts UQ0.16 value to UQ0.22 data type. */
 uq022_t uq022_from_uq016(const uq016_t x) {
     assert((x & ~UQ016_MASK) == 0);
-    return((uq022_t)x << (UQ022_BIT - UQ016_BIT));
+    return((uq022_t)x << (UQ022_FRAC - UQ016_FRAC));
 }
 
 /* Converts SQ0.21 value to SQ0.15 data type. */
 sq015_t sq015_from_sq021(const sq021_t x) {
     assert(((x & SQ021_SIGN ? ~x : x) & ~SQ021_MASK) == 0);
-    return(x >> (SQ021_BIT - SQ015_BIT));
+    return(x >> (SQ021_FRAC - SQ015_FRAC));
 }
 
 /* Converts UQ0.22 value to UQ0.16 data type. */
 uq016_t uq016_from_uq022(const uq022_t x) {
     assert((x & ~UQ022_MASK) == 0);
-    return(x >> (UQ022_BIT - UQ016_BIT));
+    return(x >> (UQ022_FRAC - UQ016_FRAC));
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/

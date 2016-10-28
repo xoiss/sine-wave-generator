@@ -88,9 +88,15 @@ static const uq016_t sin_lut[] = {
     0xFD3B, 0xFD74, 0xFDAC, 0xFDE1, 0xFE13, 0xFE43, 0xFE71, 0xFE9C,
     0xFEC4, 0xFEEB, 0xFF0E, 0xFF30, 0xFF4E, 0xFF6B, 0xFF85, 0xFF9C,
     0xFFB1, 0xFFC4, 0xFFD4, 0xFFE1, 0xFFEC, 0xFFF5, 0xFFFB, 0xFFFF,
+// TODO: append [256]
+// TODO: update description
+// TODO: revise 0xFFFF values
+// TODO: revise excel and python
 };
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+#include <assert.h>
+
 /* Returns the sine given a momentary phase, signed fixed point 0.21-bit version. */
 sq021_t sin_sq021(const uq016_t phi) {
 
@@ -99,6 +105,7 @@ sq021_t sin_sq021(const uq016_t phi) {
     #define _PI     (0x8000)        /* pi radian, encoded as 0.5 unsigned fixed point. */
     #define _3_PI_2 (0xC000)        /* 3*pi/2 radian, encoded as 0.75 unsigned fixed point. */
     #define _1      (0x200000)      /* Values +1 and -1, both encoded as -1.0 signed fixed point. */
+// TODO: Do we really need it as a separate code?
     if (phi == _PI_2 || phi == _3_PI_2)
         return _1;
 
@@ -118,19 +125,20 @@ sq021_t sin_sq021(const uq016_t phi) {
     #define _COEF_RANK  (_PHI_RANK / _LUT_RANK)     /* Number of different phi values between adjacent LUT entries. */
     #define _COEF_MASK  (_COEF_RANK - 1)            /* Bit mask for linear interpolation coefficient. */
     const ... coef = phi1 & _COEF_MASK;             /* Linear interpolation coefficient. */
-    const size_t key0 = phi1 >> _COEF_RANK;         /* Left side key into the LUT. */
-    const size_t key1 = key0 + 1;                   /* Right side key into the LUT. */
+    const size_t key = phi1 >> _COEF_RANK;          /* Key into the LUT. */
+    assert(key < ARRAY_SIZE(sin_lut));
 
     /* Perform linear interpolation over the LUT. */
-    
+    const uq121_t val0 = uq121_from_uq016(sin_lut[key]);    /* Left-hand value from the LUT. */
+
 
 
 // introduce the LUT rank
 // introduce -1.0 as the possible code for +1.0
     #undef _PI_2
-    #undef _PI  
+    #undef _PI
     #undef _3_PI_2
-    #undef _1     
+    #undef _1
     #undef _PHI_RANK
     #undef _LUT_RANK
     #undef _COEF_RANK
