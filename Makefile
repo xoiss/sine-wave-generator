@@ -6,7 +6,7 @@ endif
 SOURCES := $(shell ls *.c 2>/dev/null)
 
 CC = gcc
-CFLAGS = -ansi -pedantic-errors -Wall -Werror -O2 -g
+CFLAGS = -std=c90 -ansi -pedantic-errors -Wall -Werror -O2 -g
 
 .PHONY: all clean
 
