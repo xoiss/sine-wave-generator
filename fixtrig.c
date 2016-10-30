@@ -37,7 +37,7 @@
  *  | 0.5        | 0.5                | 0x8000         |
  *  | 1/2^16     | 0.0000152587890625 | 0x0001         |
  *  | 0          | 0.0                | 0x0000         |
- * @note    The momentary amplitude value 1 exactly cannot be represented as a UQ0.16 value. However, it is actually 
+ * @note    The momentary amplitude value 1 exactly cannot be represented as a UQ0.16 value. However, it is actually
  *  never reached taking into account the resolution of \p phi.
  */
 static uq016_t qsin_uq016(const uq016_t phi);
@@ -88,7 +88,7 @@ static uq016_t qsin_uq016(const uq016_t phi);
  *  | 0.5        | 0.5                | 0x8000         |
  *  | 1/2^16     | 0.0000152587890625 | 0x0001         |
  *  | 0          | 0.0                | 0x0000         |
- * @note    The momentary amplitude value 1 exactly cannot be represented as a UQ0.16 value. However, it is actually 
+ * @note    The momentary amplitude value 1 exactly cannot be represented as a UQ0.16 value. However, it is actually
  *  never reached taking into account the resolution of \p phi.
  */
 static const uq016_t qsin_lut[] = {
@@ -136,7 +136,7 @@ uq016_t qsin_uq016(const uq016_t phi) {
     #define _COEF_RANK  (_PHI_RANK / _KEY_RANK)         /* Number of different phi values between LUT entries. */
     #define _COEF_BIT   (LOG2(_COEF_RANK))              /* Width of the linear interpolation coefficient. */
     #define _COEF_MASK  (BIT_MASK(_COEF_BIT))           /* Bit mask for linear interpolation coefficient. */
-    #define _1          (0x0000u)                       /* Container value for UQ016 value 1.0
+    #define _1          (0x0000u)                       /* Container value for UQ0.16 value 1.0
                                                          * represented as 0.0 modulo 1.0. */
     /**@endcond*/
 
@@ -174,12 +174,12 @@ uq016_t qsin_uq016(const uq016_t phi) {
 sq015_t msin_sq015(const uq016_t phi, const uq016_t att) {
 
     /**@cond false*/
-    #define _PI2    (0x4000u)       /* Container value for UQ016 value 0.25 which stays for pi/2 radian. */
-    #define _PI     (0x8000u)       /* Container value for UQ016 value 0.5 which stays for pi radian. */
-    #define _3PI2   (0xC000u)       /* Container value for UQ016 value 0.75 which stays for 3*pi/2 radian. */
-    #define _1P     (0x7FFF)        /* Container value for SQ015 value +1.0-1/2^15. */
-    #define _1N     (0x8000)        /* Container value for SQ015 value -1.0. */
-    #define _1      (0x0000u)       /* Container value for UQ016 value 1.0 represented as 0.0 modulo 1.0. */
+    #define _PI2    (0x4000u)       /* Container value for UQ0.16 value 0.25 which stays for pi/2 radian. */
+    #define _PI     (0x8000u)       /* Container value for UQ0.16 value 0.5 which stays for pi radian. */
+    #define _3PI2   (0xC000u)       /* Container value for UQ0.16 value 0.75 which stays for 3*pi/2 radian. */
+    #define _1P     (0x7FFF)        /* Container value for SQ0.15 value +1.0-1/2^15. */
+    #define _1N     (0x8000)        /* Container value for SQ0.15 value -1.0. */
+    #define _1      (0x0000u)       /* Container value for UQ0.16 value 1.0 represented as 0.0 modulo 1.0. */
     /**@endcond*/
 
     if (phi == _PI2) {
@@ -191,7 +191,9 @@ sq015_t msin_sq015(const uq016_t phi, const uq016_t att) {
     } else {
         uq016_t phi1 = phi;     /* Value of phi brought into the first quadrant - i.e., the range [0; pi/2) radian. */
         bool_t  neg = 0;        /* Equals to 1 if sin(phi) < 0; equals to 0 if sin(phi) >= 0. */
-        uq016_t usin;           /* Absolute value of sin(phi). */
+        uq016_t usin;           /* Unsigned 0.16-bit absolute value of sin(phi). */
+        bool_t  lsb;            /* Value of LSB of 0.16-bit value returned by sin(phi) before rounding to 0.15-bit. */
+        sq015_t ssin;           /* Signed 0.15-bit absolute value of sin(phi). */
 
         if (phi >= _PI) {
             phi1 -= _PI;
@@ -207,7 +209,13 @@ sq015_t msin_sq015(const uq016_t phi, const uq016_t att) {
             usin = qmul_uq016(usin, _1 - att);
         }
 
-        return neg ? -sq015_from_uq016(usin) : +sq015_from_uq016(usin);
+        lsb = usin & 1;
+        ssin = sq015_from_uq016(usin);
+        if (lsb && ssin < 0x7FFF) {
+            ++ssin;
+        }
+
+        return neg ? -ssin : +ssin;
     }
 
     #undef  _PI2

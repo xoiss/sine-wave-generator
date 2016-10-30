@@ -18,9 +18,9 @@
  * @param[in]   a   -- the first multiplicand.
  * @param[in]   b   -- the second multiplicand.
  * @return  The product a*b.
- * @details The domain of the defined function is the superposition of all allowed values of \p a and \p b, which are in 
+ * @details The domain of the defined function is the superposition of all allowed values of \p a and \p b, which are in
  *  turn both belong to the set of UQ0.16 values in the discrete range [0.0; 1.0-1/2^16] with resolution of 1/2^16.
- * @details The codomain of the defined function is the set of UQ0.16 values in the discrete range [0.0; 1.0-1/2^16] 
+ * @details The codomain of the defined function is the set of UQ0.16 values in the discrete range [0.0; 1.0-1/2^16]
  *  with resolution of 1/2^16.
  * @details The product is rounded down to the nearest value with resolution of 1/2^16.
  */
