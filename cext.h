@@ -95,24 +95,63 @@
 /**@}*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-/**@name    Macros for composing bit masks.
+/**@name    Macros for working with binary magnitude.
+ * @{
+ */
+/**@brief   Returns the binary exponent of the given value.
+ * @param[in]   x   -- the power.
+ * @return  The value of two in the power of the given exponent.
+ */
+#define POW2(x)         (1uL << (x))
+
+/**@brief   Returns the binary logarithm of the given value.
+ * @param[in]   x   -- the exponent.
+ * @return  The value of binary logarithm of the given exponent rounded down to the nearest integer.
+ */
+#define LOG2(x)         (\
+    x <= POW2(0)  ? 0  : x <= POW2(1)  ? 1  : x <= POW2(2)  ? 2  : x <= POW2(3)  ? 3  :\
+    x <= POW2(4)  ? 4  : x <= POW2(5)  ? 5  : x <= POW2(6)  ? 6  : x <= POW2(7)  ? 7  :\
+    x <= POW2(8)  ? 8  : x <= POW2(9)  ? 9  : x <= POW2(10) ? 10 : x <= POW2(11) ? 11 :\
+    x <= POW2(12) ? 12 : x <= POW2(13) ? 13 : x <= POW2(14) ? 14 : x <= POW2(15) ? 15 :\
+    x <= POW2(16) ? 16 : x <= POW2(17) ? 17 : x <= POW2(18) ? 18 : x <= POW2(19) ? 19 :\
+    x <= POW2(20) ? 20 : x <= POW2(21) ? 21 : x <= POW2(22) ? 22 : x <= POW2(23) ? 23 :\
+    x <= POW2(24) ? 24 : x <= POW2(25) ? 25 : x <= POW2(26) ? 26 : x <= POW2(27) ? 27 :\
+    x <= POW2(28) ? 28 : x <= POW2(29) ? 29 : x <= POW2(30) ? 30 : x <= POW2(31) ? 31 : 32)
+/**@}*/
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/**@name    Macros for working with bit masks.
  * @{
  */
 /**@brief   Composes a single bit mask having only one given bit selected.
  * @param[in]   nr  -- index (starting with 0) of the bit to be selected.
- * @return  The requested bit mask.
- * @note    The \p nr must be less than the number of bits in the native integer data type of the host simulator
- *  platform to avoid the undefined behavior.
+ * @return  The requested bit mask, unsigned long integer.
+ * @note    The \p nr must be less than the number of bits in the native unsigned long integer data type of the host
+ *  simulator platform to avoid the undefined behavior.
  */
-#define BIT(nr)         (1UL << (nr))
+#define BIT(nr)         (POW2(nr))
 
 /**@brief   Composes a multiple bit mask having the given number of contiguous lower order bits selected.
  * @param[in]   nr  -- number of the lower order bits to be selected.
- * @return  The requested bit mask.
- * @note    The \p nr must be less than the number of bits in the native integer data type of the host simulator
- *  platform to avoid the undefined behavior.
+ * @return  The requested bit mask, unsigned long integer.
+ * @note    The \p nr must be less than the number of bits in the native unsigned long integer data type of the host
+ *  simulator platform to avoid the undefined behavior.
  */
-#define BIT_MASK(nr)    (BIT(nr) - 1UL)
+#define BIT_MASK(nr)    (BIT(nr) - 1)
+/**@}*/
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/**@name    Macros for working with arrays.
+ * @{
+ */
+/**\brief   Returns the number of elements in the given array.
+ * \param[in]   x   -- identifier of the array variable.
+ * \return  Number of elements in the array \p x.
+ * \note    This macro cannot be used for arrays passed to a function through its parameters list as soon as such
+ *  parameters are considered as pointers by the compiler (namely pointers, but not arrays), and the information about
+ *  the number of elements is ignored by the compiler even it is explicitly specified in the function declaration.
+ */
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
 /**@}*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/

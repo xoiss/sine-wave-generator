@@ -63,18 +63,18 @@ static_assert_msg(
 
 /* Check that signed integer data types have the two's complement representation of negative values. */
 static_assert_msg(
-    (si8_t)-1 >> 1 << 1 == (si8_t)-2 &&
-    (si16_t)-1 >> 1 << 1 == (si16_t)-2 &&
-    (si22_t)-1 >> 1 << 1 == (si22_t)-2 &&
-    (si32_t)-1 >> 1 << 1 == (si32_t)-2,
+    (si8_t)-1L >> 1 << 1 == (si8_t)-2L &&
+    (si16_t)-1L >> 1 << 1 == (si16_t)-2L &&
+    (si22_t)-1L >> 1 << 1 == (si22_t)-2L &&
+    (si32_t)-1L >> 1 << 1 == (si32_t)-2L,
     some_of_signed_integer_data_types_have_unexpected_format);
 
 /* Check signed integer data types ranges. */
 static_assert_msg(
-    (si8_t)0x7Fu > 0 && (si8_t)(0x7Fu + 1) < 0 &&
-    (si16_t)0x7FFFu > 0 && (si16_t)(0x7FFFu + 1) < 0 &&
-    (si22_t)0x7FFFFFFFu > 0 && (si22_t)(0x7FFFFFFFu + 1) < 0 &&
-    (si32_t)0x7FFFFFFFu > 0 && (si32_t)(0x7FFFFFFFu + 1) < 0,
+    (si8_t)0x7FuL > 0 && (si8_t)(0x7FuL + 1) < 0 &&
+    (si16_t)0x7FFFuL > 0 && (si16_t)(0x7FFFuL + 1) < 0 &&
+    (si22_t)0x7FFFFFFFuL > 0 && (si22_t)(0x7FFFFFFFuL + 1) < 0 &&
+    (si32_t)0x7FFFFFFFuL > 0 && (si32_t)(0x7FFFFFFFuL + 1) < 0,
     some_of_signed_integer_data_types_have_unexpected_ranges);
 
 /**@endcond*/

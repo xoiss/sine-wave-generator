@@ -1,61 +1,97 @@
-/*--------------------------------------------------------------------------------------------------------------------*/
-/**\brief   Returns the number of elements in the given array.
- * \param[in]   x   Identifier of the array variable.
- * \return  Number of elements.
- * \note    This macro cannot be used for arrays passed to a function through its parameters list as soon as such
- *  parameters are considered as pointers by the compiler (namely pointers, but not arrays), and the information about
- *  the number of elements is ignored by the compiler even it is explicitly specified in a function declaration.
+/**@file
+ * @brief   Implementation of trigonometry functions on fixed point data types.
+ * @details This file implements trigonometry functions used for sine wave signal generation in the field of fixed point
+ *  numbers.
+ * @author  Alexander A. Strelets
+ * @version 1.0
+ * @date    October, 2016
+ * @copyright   GNU Public License
  */
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*(x)))
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 #include "fixtrig.h"
+#include "fixmath.h"
 
-/**\brief   Phase-to-sine lookup table (LUT).
- * \details This table keeps the exact values of the function sin(phi) for the argument phi in the discrete range
- *  [0; pi/2) radians with regular step between knots on the phi axis. The table has only one column for the value of
- *  sin(phi) and 256 records each corresponding to one of the allowed phi values.
- * \details The domain of this table is the set of unsigned 8-bit integer keys - i.e., the discrete range [0; 255]. This
- *  range corresponds to the floating point range [0; pi/2) with resolution of pi/512 radian. For example:
- *  | phi, radian   | fixed point value | container code | 8-bit integer key |
- *  |---------------|-------------------|----------------|-------------------|
- *  | 0             | 0.0               | 0x0000         | 0                 |
- *  | pi/512        | 0.0009765625      | 0x0040         | 1                 |
- *  | pi/4          | 0.125             | 0x2000         | 128               |
- *  | pi/2 - pi/512 | 0.2490234375      | 0x3FC0         | 255               |
- *  | pi/2          | not allowed       | not allowed    | not allowed       |
- * \details To obtain the unsigned 8-bit integer key which may be used as the index into the table given the fixed point
- *  \p phi value, the following formula shall be used:
- *  - key = phi.code / 64, where:
- *  - phi.code is the unsigned integer 16-bit container code of the fixed point value of \p phi. Note that as soon as
- *      \p phi belongs to the range [0.0; 0.25), which corresponds to [0; pi/2) radians, the phi.code belongs to the
- *      range [0x0000; 0x3FFF]
- *  - 64 is the number of distinguishable phi values which may be represented as different fixed point values between
- *      any two adjacent entries into the table
- * \details For the case when the given phase belongs to the whole range [0; 2*pi) radians and does not necessarily
- *  belong to the domain [0; pi/2), the following conversion shall be taken:
- *  | phase, radian  | phi, radian    | fixed point expression | postprocessing               |
- *  |----------------|----------------|------------------------|------------------------------|
- *  | [0; pi/2)      | phase          | phase                  |                              |
- *  |  pi/2          | not allowed    | not allowed            | sin(pi/2) = +1               |
- *  | (pi/2; pi)     | pi - phase     | 0.5 - phase            |                              |
- *  | [pi; 3*pi/2)   | phase - pi     | phase - 0.5            | inverse the sign of sin(phi) |
- *  |  3*pi/2        | not allowed    | not allowed            | sin(3*pi/2) = -1             |
- *  | (3*pi/2; 2*pi) | 2*pi - phase   | -1.0 - phase           | inverse the sign of sin(phi) |
- *  |  2*pi          | not achievable | not achievable         |                              |
- * \details The codomain of this table is the set of unsigned fixed point 0.16-bit values - i.e., the discrete range
- *  [0.0; 1.0-1/2^16] with resolution of 1/2^16. This range corresponds to the floating point range [0; +1) with
- *  resolution of 1/2^16. For example:
+/*--------------------------------------------------------------------------------------------------------------------*/
+/**@brief   Returns the sine given a momentary phase, unsigned fixed point 0.16-bit version.
+ * @param[in]   phi -- momentary phase.
+ * @return  Momentary amplitude of the function sin(phi).
+ * @details The domain of the defined function is the subset of UQ0.16 values in the discrete range [0.0; 0.25-1/2^16]
+ *  with resolution of 1/2^16. This range is scaled to the floating point range [0; pi/2) with resolution of pi/2^15
+ *  radian:
+ *  | phase, radian  | fixed point value  | container code |
+ *  |----------------|--------------------|----------------|
+ *  | pi/2           | not allowed (*)    | not allowed    |
+ *  | pi/2 - pi/2^15 | 0.2499847412109375 | 0x3FFF         |
+ *  | pi/4           | 0.125              | 0x2000         |
+ *  | pi/2^15        | 0.0000152587890625 | 0x0001         |
+ *  | 0              | 0.0                | 0x0000         |
+ * @note    Values of the phase outside the domain range [0; pi/2) radians shall be projected into the domain.
+ * @details The codomain of the defined function is the set of UQ0.16 values in the discrete range [0.0; 1.0-1/2^16]
+ *  with resolution of 1/2^16. This range corresponds to the floating point range [0; 1) with resolution of 1/2^16:
  *  | amplitude  | fixed point value  | container code |
  *  |------------|--------------------|----------------|
- *  | 1          | not achievable     | not achievable |
+ *  | 1          | not reachable (*)  | not reachable  |
  *  | 1 - 1/2^16 | 0.9999847412109375 | 0xFFFF         |
  *  | 0.75       | 0.75               | 0xC000         |
  *  | 0.5        | 0.5                | 0x8000         |
  *  | 1/2^16     | 0.0000152587890625 | 0x0001         |
  *  | 0          | 0.0                | 0x0000         |
+ * @note    The momentary amplitude value 1 exactly cannot be represented as a UQ0.16 value. However, it is actually 
+ *  never reached taking into account the resolution of \p phi.
  */
-static const uq016_t sin_lut[] = {
+static uq016_t qsin_uq016(const uq016_t phi);
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/**@brief   Phase-to-sine lookup table (LUT).
+ * @param[in]   phi -- momentary phase.
+ * @return  Momentary amplitude of the function sin(phi).
+ * @details This table keeps the exact values of the function sin(phi) for the argument \p phi in the discrete range
+ *  [0; pi/2) radians with regular step between knots on the phi axis. The table has only one column for the value of
+ *  sin(phi) and 256 records each corresponding to one of the allowed \p phi values.
+ * @details The domain of this table is the set of unsigned 8-bit integer keys - i.e., the discrete range [0; 255]. This
+ *  range corresponds to the floating point range [0; pi/2) with resolution of pi/512 radian:
+ *  | phi, radian   | fixed point value | container code | 8-bit integer key |
+ *  |---------------|-------------------|----------------|-------------------|
+ *  | pi/2          | not allowed       | not allowed    | not allowed       |
+ *  | pi/2 - pi/512 | 0.2490234375      | 0x3FC0         | 255               |
+ *  | pi/4          | 0.125             | 0x2000         | 128               |
+ *  | pi/512        | 0.0009765625      | 0x0040         | 1                 |
+ *  | 0             | 0.0               | 0x0000         | 0                 |
+ * @details To obtain the unsigned 8-bit integer key which may be used as the index into the table given the fixed point
+ *  \p phi value, the following formula shall be used:
+ *  - key = phi.code / 64, where:
+ *  - phi.code is the unsigned integer 16-bit container code of the fixed point value of \p phi. Note that as soon as
+ *      \p phi belongs to the range [0.0; 0.25), which corresponds to [0; pi/2) radians, the phi.code belongs to the
+ *      range [0x0000; 0x3FFF] and consequently key will belong to the range [0; 255].
+ *  - 64 is the number of distinguishable phi values which may be represented as different fixed point values between
+ *      any two adjacent entries into the table.
+ * @details For the case when the given phase belongs to the whole range [0; 2*pi) radians and does not necessarily
+ *  belong to the domain [0; pi/2), the following conversion shall be taken:
+ *  | phase, radian  | phi, radian   | fixed point expression | postprocessing               |
+ *  |----------------|---------------|------------------------|------------------------------|
+ *  |  2*pi          | not reachable | not reachable          |                              |
+ *  | (3*pi/2; 2*pi) | 2*pi - phase  | -1.0 - phase           | inverse the sign of sin(phi) |
+ *  |  3*pi/2        | not allowed   | not allowed            | sin(3*pi/2) = -1             |
+ *  | [pi; 3*pi/2)   | phase - pi    | phase - 0.5            | inverse the sign of sin(phi) |
+ *  | (pi/2; pi)     | pi - phase    | 0.5 - phase            |                              |
+ *  |  pi/2          | not allowed   | not allowed            | sin(pi/2) = +1               |
+ *  | [0; pi/2)      | phase         | phase                  |                              |
+ * @details The codomain of this table is the set of unsigned fixed point 0.16-bit values - i.e., the discrete range
+ *  [0.0; 1.0-1/2^16] with resolution of 1/2^16. This range corresponds to the floating point range [0; 1) with
+ *  resolution of 1/2^16:
+ *  | amplitude  | fixed point value  | container code |
+ *  |------------|--------------------|----------------|
+ *  | 1          | not reachable (*)  | not reachable  |
+ *  | 1 - 1/2^16 | 0.9999847412109375 | 0xFFFF         |
+ *  | 0.75       | 0.75               | 0xC000         |
+ *  | 0.5        | 0.5                | 0x8000         |
+ *  | 1/2^16     | 0.0000152587890625 | 0x0001         |
+ *  | 0          | 0.0                | 0x0000         |
+ * @note    The momentary amplitude value 1 exactly cannot be represented as a UQ0.16 value. However, it is actually 
+ *  never reached taking into account the resolution of \p phi.
+ */
+static const uq016_t qsin_lut[] = {
     0x0000, 0x0192, 0x0324, 0x04B6, 0x0648, 0x07DA, 0x096C, 0x0AFE,
     0x0C90, 0x0E21, 0x0FB3, 0x1144, 0x12D5, 0x1466, 0x15F7, 0x1787,
     0x1918, 0x1AA8, 0x1C38, 0x1DC7, 0x1F56, 0x20E5, 0x2274, 0x2402,
@@ -88,60 +124,98 @@ static const uq016_t sin_lut[] = {
     0xFD3B, 0xFD74, 0xFDAC, 0xFDE1, 0xFE13, 0xFE43, 0xFE71, 0xFE9C,
     0xFEC4, 0xFEEB, 0xFF0E, 0xFF30, 0xFF4E, 0xFF6B, 0xFF85, 0xFF9C,
     0xFFB1, 0xFFC4, 0xFFD4, 0xFFE1, 0xFFEC, 0xFFF5, 0xFFFB, 0xFFFF,
-// TODO: append [256]
-// TODO: update description
-// TODO: revise 0xFFFF values
-// TODO: revise excel and python
 };
 
 /*--------------------------------------------------------------------------------------------------------------------*/
-#include <assert.h>
+/* Returns the sine given a momentary phase, signed fixed point 0.15-bit version. */
+uq016_t qsin_uq016(const uq016_t phi) {
 
-/* Returns the sine given a momentary phase, signed fixed point 0.21-bit version. */
-sq021_t sin_sq021(const uq016_t phi) {
+    /**@cond false*/
+    #define _PHI_RANK   (POW2(UQ016_BIT) / 4)           /* Number of different phi values in the first quadrant. */
+    #define _KEY_RANK   (ARRAY_SIZE(qsin_lut))          /* Number of entries in the phase-to-sine LUT. */
+    #define _COEF_RANK  (_PHI_RANK / _KEY_RANK)         /* Number of different phi values between LUT entries. */
+    #define _COEF_BIT   (LOG2(_COEF_RANK))              /* Width of the linear interpolation coefficient. */
+    #define _COEF_MASK  (BIT_MASK(_COEF_BIT))           /* Bit mask for linear interpolation coefficient. */
+    #define _1          (0x0000u)                       /* Container value for UQ016 value 1.0
+                                                         * represented as 0.0 modulo 1.0. */
+    /**@endcond*/
 
-    /* Process cases phi = pi/2 and pi = 3*pi/2 which are not covered by the LUT. */
-    #define _PI_2   (0x4000)        /* pi/2 radian, encoded as 0.25 unsigned fixed point. */
-    #define _PI     (0x8000)        /* pi radian, encoded as 0.5 unsigned fixed point. */
-    #define _3_PI_2 (0xC000)        /* 3*pi/2 radian, encoded as 0.75 unsigned fixed point. */
-    #define _1      (0x200000)      /* Values +1 and -1, both encoded as -1.0 signed fixed point. */
-// TODO: Do we really need it as a separate code?
-    if (phi == _PI_2 || phi == _3_PI_2)
-        return _1;
+    ui8_t   key0;       /* Left side key into the phase-to-sine LUT. */
+    uq016_t coef;       /* Linear interpolation coefficient. */
 
-    /* Bring phi to the first quadrant. */
-    uq016_t phi1 = phi;     /* Value of phi brought into the first quadrant. */
-    char negate = 0;        /* 1 if need to inverse the sign of sin(phi) taken from the LUT. */
-    if (phi >= _PI) {
-        phi1 -= _PI;
-        negate = 1;
+    static_assert(POW2(sizeof(key0) * 8) == _KEY_RANK);
+
+    key0 = phi >> _COEF_BIT;
+    coef = (phi & _COEF_MASK) << (UQ016_BIT - _COEF_BIT);
+
+    if (coef == 0) {
+        return qsin_lut[key0];
+
+    } else {
+        ui8_t   key1;               /* Right side key into the phase-to-sine LUT. */
+        uq016_t val0, val1;         /* Left and right side values taken from the LUT with linear weight. */
+        key1 = key0 + 1;
+        val1 = key1 == 0 ? coef : qmul_uq016(qsin_lut[key1], coef);
+        val0 = qmul_uq016(qsin_lut[key0], _1 - coef);
+        return val0 + val1;
     }
-    if (phi_ > _PI_2)
-        phi1 = _PI - phi1;
 
-    /* Obtain the key pair for the LUT and the linear interpolation coefficient. */
-    #define _PHI_RANK   (1 << (UQ016_BIT - 2))      /* Number of different phi values in the first quadrant. */
-    #define _LUT_RANK   (ARRAY_SIZE(sin_lut))       /* Number of entries in the LUT. */
-    #define _COEF_RANK  (_PHI_RANK / _LUT_RANK)     /* Number of different phi values between adjacent LUT entries. */
-    #define _COEF_MASK  (_COEF_RANK - 1)            /* Bit mask for linear interpolation coefficient. */
-    const ... coef = phi1 & _COEF_MASK;             /* Linear interpolation coefficient. */
-    const size_t key = phi1 >> _COEF_RANK;          /* Key into the LUT. */
-    assert(key < ARRAY_SIZE(sin_lut));
+    #undef  _PHI_RANK
+    #undef  _KEY_RANK
+    #undef  _COEF_RANK
+    #undef  _COEF_BIT
+    #undef  _COEF_MASK
+    #undef  _1
+}
 
-    /* Perform linear interpolation over the LUT. */
-    const uq121_t val0 = uq121_from_uq016(sin_lut[key]);    /* Left-hand value from the LUT. */
+/*--------------------------------------------------------------------------------------------------------------------*/
+/* Returns the modulated sine given a momentary phase and momentary attenuation factor, signed fixed point 0.15-bit
+ * version. */
+sq015_t msin_sq015(const uq016_t phi, const uq016_t att) {
 
+    /**@cond false*/
+    #define _PI2    (0x4000u)       /* Container value for UQ016 value 0.25 which stays for pi/2 radian. */
+    #define _PI     (0x8000u)       /* Container value for UQ016 value 0.5 which stays for pi radian. */
+    #define _3PI2   (0xC000u)       /* Container value for UQ016 value 0.75 which stays for 3*pi/2 radian. */
+    #define _1P     (0x7FFF)        /* Container value for SQ015 value +1.0-1/2^15. */
+    #define _1N     (0x8000)        /* Container value for SQ015 value -1.0. */
+    #define _1      (0x0000u)       /* Container value for UQ016 value 1.0 represented as 0.0 modulo 1.0. */
+    /**@endcond*/
 
+    if (phi == _PI2) {
+        return att == 0 ? _1P : +sq015_from_uq016(_1 - att);
 
-// introduce the LUT rank
-// introduce -1.0 as the possible code for +1.0
-    #undef _PI_2
-    #undef _PI
-    #undef _3_PI_2
-    #undef _1
-    #undef _PHI_RANK
-    #undef _LUT_RANK
-    #undef _COEF_RANK
+    } else if (phi == _3PI2) {
+        return att == 0 ? _1N : -sq015_from_uq016(_1 - att);
+
+    } else {
+        uq016_t phi1 = phi;     /* Value of phi brought into the first quadrant - i.e., the range [0; pi/2) radian. */
+        bool_t  neg = 0;        /* Equals to 1 if sin(phi) < 0; equals to 0 if sin(phi) >= 0. */
+        uq016_t usin;           /* Absolute value of sin(phi). */
+
+        if (phi >= _PI) {
+            phi1 -= _PI;
+            neg = 1;
+        }
+        if (phi1 > _PI2) {
+            phi1 = _PI - phi1;
+        }
+
+        usin = qsin_uq016(phi1);
+
+        if (att > 0) {
+            usin = qmul_uq016(usin, _1 - att);
+        }
+
+        return neg ? -sq015_from_uq016(usin) : +sq015_from_uq016(usin);
+    }
+
+    #undef  _PI2
+    #undef  _PI
+    #undef  _3PI2
+    #undef  _1P
+    #undef  _1N
+    #undef  _1
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
