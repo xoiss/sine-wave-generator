@@ -29,6 +29,8 @@ typedef signed char         si8_t;      /**< Integer data type, signed, 8-bit wi
 typedef unsigned char       ui8_t;      /**< Integer data type, unsigned, 8-bit width. */
 typedef signed short int    si16_t;     /**< Integer data type, signed, 16-bit width. */
 typedef unsigned short int  ui16_t;     /**< Integer data type, unsigned, 16-bit width. */
+typedef signed long int     si32_t;     /**< Integer data type, signed, 32-bit width. */
+typedef unsigned long int   ui32_t;     /**< Integer data type, unsigned, 32-bit width. */
 /**@}*/
 
 /**@name    Integer data types with nonstandard width.
@@ -52,24 +54,27 @@ typedef unsigned long int   ui22_t;     /**< Integer data type, unsigned, 22-bit
 
 /* Check integer data types widths. */
 static_assert_msg(
+    sizeof(bool_t) == 1 &&
     sizeof(si8_t) == 1 && sizeof(ui8_t) == 1 &&
     sizeof(si16_t) == 2 && sizeof(ui16_t) == 2 &&
-    sizeof(bool_t) == 1 &&
-    sizeof(si22_t) == 4 && sizeof(ui22_t) == 4,
+    sizeof(si22_t) == 4 && sizeof(ui22_t) == 4 &&
+    sizeof(si32_t) == 4 && sizeof(ui32_t) == 4,
     some_of_integer_data_types_have_unexpected_widths);
 
 /* Check that signed integer data types have the two's complement representation of negative values. */
 static_assert_msg(
     (si8_t)-1 >> 1 << 1 == (si8_t)-2 &&
     (si16_t)-1 >> 1 << 1 == (si16_t)-2 &&
-    (si22_t)-1 >> 1 << 1 == (si22_t)-2,
+    (si22_t)-1 >> 1 << 1 == (si22_t)-2 &&
+    (si32_t)-1 >> 1 << 1 == (si32_t)-2,
     some_of_signed_integer_data_types_have_unexpected_format);
 
 /* Check signed integer data types ranges. */
 static_assert_msg(
     (si8_t)0x7Fu > 0 && (si8_t)(0x7Fu + 1) < 0 &&
     (si16_t)0x7FFFu > 0 && (si16_t)(0x7FFFu + 1) < 0 &&
-    (si22_t)0x7FFFFFFFu > 0 && (si22_t)(0x7FFFFFFFu + 1) < 0,
+    (si22_t)0x7FFFFFFFu > 0 && (si22_t)(0x7FFFFFFFu + 1) < 0 &&
+    (si32_t)0x7FFFFFFFu > 0 && (si32_t)(0x7FFFFFFFu + 1) < 0,
     some_of_signed_integer_data_types_have_unexpected_ranges);
 
 /**@endcond*/

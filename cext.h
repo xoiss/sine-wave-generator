@@ -58,7 +58,7 @@
  * @param[in]   cond    -- an asserted condition.
  * @param[in]   msg     -- an error message identifier.
  * @details The asserted condition \p cond shall be computable at the compile time and evaluate to an integer constant.
- *  It shall evaluate to a nonzero value if the condition holds, and to zero otherwise.
+ *  It shall evaluate to a non-zero value if the condition holds, and to zero otherwise.
  * @details The \p msg must be specified with a valid identifier. Note, it must not be a sting literal.
  * @details If the \p cond does not hold, the compiler logs a compile time error with the message \p msg. The exact
  *  format of the error message depends on the compiler and the language standard. However, the \p msg will be included
@@ -82,7 +82,7 @@
 /**@brief   Validates the asserted expression during the compile time and puts an error.
  * @param[in]   cond    -- an asserted condition.
  * @details The asserted condition \p cond shall be computable at the compile time and evaluate to an integer constant.
- *  It shall evaluate to a nonzero value if the condition holds, and to zero otherwise.
+ *  It shall evaluate to a non-zero value if the condition holds, and to zero otherwise.
  * @details If the \p cond does not hold, the compiler logs a compile time error.
  * @details This macro may be used both outside and inside a function definition block. The number of occurrences in the
  *  same translation unit and even in the same line of code is not limited.

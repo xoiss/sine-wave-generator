@@ -1,6 +1,6 @@
 /**@file
  * @brief   Implementation of fixed point data types.
- * @details This file provides definitions for functions converting fixed point values between different types.
+ * @details This file implements functions converting fixed point values between different types.
  * @author  Alexander A. Strelets
  * @version 1.0
  * @date    October, 2016
@@ -18,9 +18,9 @@
  * @note    If a fixed point data type width is less than the width of its integer container used for simulation of the
  *  fixed point data type, the sign bit of the contained fixed point data type and the sign bit of the container data
  *  type are different bits within the container binary representation. However, if the container value is properly
- *  constructed - i.e., if all the unused higher order bits of the container propagate the value of the sign bit of the
- *  contained fixed point value - the sign of the integer container always repeats the sign of the contained fixed point
- *  value.
+ *  constructed -- i.e., if all the unused higher order bits of the container propagate the value of the sign bit of the
+ *  contained fixed point value -- the sign of the integer container always repeats the sign of the contained fixed
+ *  point value.
  * @{
  */
 #define SQ015_SIGN      (BIT(SQ015_BIT - 1))        /**< Bit mask for the sign bit of the SQ0.15 data type. */
@@ -31,8 +31,8 @@
  * @details If a fixed point data type width equals to the integer container data type width, all bits of the container
  *  integer data type are considered effective. Inversely, if the integer container data type is wider than the
  *  contained fixed point data type, there are unused higher order bits in the container; in this case the remaining
- *  lower order bits - i.e., those actually used for representing the contained fixed point data type, are considered
- *  effective - they are only those included into the mask.
+ *  lower order bits -- i.e., those actually used for representing the contained fixed point data type, are considered
+ *  effective -- they are only those included into the mask.
  * @{
  */
 #define SQ015_MASK      (BIT_MASK(SQ015_BIT))       /**< Bit mask for effective bits of the SQ0.15 data type. */
