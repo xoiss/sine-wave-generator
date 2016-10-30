@@ -24,7 +24,7 @@
  *  with resolution of 1/2^16.
  * @details The product is rounded down to the nearest value with resolution of 1/2^16.
  */
-extern uq016_t qmul_uq016(const uq016 a, const uq016 b);
+extern uq016_t qmul_uq016(const uq016_t a, const uq016_t b);
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 

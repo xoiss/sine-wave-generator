@@ -12,7 +12,7 @@
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Returns the product of two fixed point values, unsigned fixed point 0.16-bit version. */
-uq016_t qmul_uq016(const uq016 a, const uq016 b) {
+uq016_t qmul_uq016(const uq016_t a, const uq016_t b) {
     return ((ui32_t)a * (ui32_t)b) >> UQ016_FRAC;
 }
 
