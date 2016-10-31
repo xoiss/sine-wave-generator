@@ -48,7 +48,7 @@
  * @note    Values of the phase outside the domain range [0; 2*pi) radians shall be projected into the domain with the
  *  formula phi = phase-2*pi*k, where k is an integer.
  * @details The allowed values of \p att are the set of UQ0.16 values in the discrete range [0.0; 1.0-1/2^16] with
- *  resolution of 1/2^16. This range is scaled to the floating point range [0; 1) with resolution of pi/2^16:
+ *  resolution of 1/2^16. This range corresponds to the floating point range [0; 1) with resolution of 1/2^16:
  *  | attenuation | fixed point value  | container code |
  *  |-------------|--------------------|----------------|
  *  | 1           | not allowed (*)    | not allowed    |

@@ -1,145 +1,138 @@
+/**@file
+ * @brief   Interface to the sine wave generator.
+ * @details This file provides declarations for the set of functions used to manipulate the sine wave generator, and
+ *  declaration of the generator descriptor data structure.
+ * @author  Alexander A. Strelets
+ * @version 1.0
+ * @date    October, 2016
+ * @copyright   GNU Public License
+ */
+
 #ifndef SINEGEN_H
 #define SINEGEN_H
 
-#include "dspfix.h"
+/*--------------------------------------------------------------------------------------------------------------------*/
+#include "fixtypes.h"
 
-/**
- * \name    Fixed point data type used for representing the momentary phase of the generator and its effective width.
- * \details The momentary phase of the generator wraps within the range [-pi; +pi) radians. The lower boundary is
- *  included into, and the upper boundary is excluded from the range.
- * \details The momentary phase is represented as SQ0.15 signed fixed point value, no integer bits, 15 fractional bits. 
- *  Its effective width is Pw = 15 bits. The code takes values in the range from -1 to +(1 - 1/2^Pw) with resolution 
- *  of 1/2^Pw which correspond to the range from -pi to +(pi - pi/2^Pw) with resolution of pi/2^Pw radians.
-
- * \note    The value of Pw must be sufficiently high to achieve the appropriate accuracy, but it must not exceed the
- *  width of the 16-bit integer data type used for external interface to DSP algorithms. Also, the lower boundary for
- *  Pw-1 is defined as the binary logarithm of the number of entries in the phase-to-sine lookup table.
-
- * \details The effective width of a fixed point data type is defined as the sum of quantities of all integer M and all 
- *  fractional N bits. The sign bit (for the case of signed fixed point) is not included in the result.
-
+/*--------------------------------------------------------------------------------------------------------------------*/
+/**@brief   Data structure for a sine wave generator descriptor.
  */
-/**@{*/
-/** Fixed point data type used for representing the momentary phase of the generator. */
-typedef dsp_sq015_t phase_t;
-/** Effective width of the fixed point data type used for representing the momentary phase of the generator, Pw, in 
- *  bits. */
-#define PHASE_CODE_WIDTH    (DSP_SQ015_WIDTH)
+struct gen_descr_t {
+    uq016_t freq;       /**< Frequency of the oscillator. */
+    uq016_t phi;        /**< Momentary phase of the oscillator. */
+    uq016_t att;        /**< Momentary attenuation of the output signal. */
+};
+
+/*--------------------------------------------------------------------------------------------------------------------*/
+/**@name    Set of functions providing interface to a sine wave generator.
+ * @{
+ */
+/**@brief   Initializes a sine wave generator.
+ * @param[in,out]   pgen    -- pointer to the initialized generator descriptor object.
+ * @details During initialization the following values assigned to the generator attributes:
+ *  - frequency     -- is set to 0, which means that the generation is paused.
+ *  - phase         -- is set to 0, just the initial phase.
+ *  - attenuation   -- is set to 0, which means no attenuation.
+ */
+extern void gen_init(struct gen_descr_t * const pgen);
+
+/**@brief   Assigns the generator frequency.
+ * @param[in,out]   pgen    -- pointer to a generator descriptor object.
+ * @param[in]       freq    -- a new value of the oscillator frequency in terms of the sampling frequency - i.e., the
+ *  ratio Fo/Fs, where Fo is the oscillator fequency and Fs is the sampling frequency, both in Hertz.
+ * @details The allowed values of \p freq are the subset of UQ0.16 values in the discrete range [0.0; 0.25] with
+ *  resolution of 1/2^16. This range corresponds to the floating point range [0; 0.25] with resolution of 1/2^16:
+ *  | Fo/Fs         | fixed point value  | container code |
+ *  |---------------|--------------------|----------------|
+ *  | 0.25          | 0.25               | 0x4000         |
+ *  | 0.25 - 1/2^16 | 0.2499847412109375 | 0x3FFF         |
+ *  | 1/2^16        | 0.0000152587890625 | 0x0001         |
+ *  | 0             | 0.0 (*)            | 0x0000         |
+ * @note    If \p freq equals 0, the generator is paused and returns the same output signal level after each sampling
+ *  step. The momentary phase is not propagated during this period.
+ */
+extern void gen_set_freq(struct gen_descr_t * const pgen, const uq016_t freq);
+
+/**@brief   Assigns the generator phase.
+ * @param[in,out]   pgen    -- pointer to a generator descriptor object.
+ * @param[in]       phi     -- a new value of the oscillator current phase.
+ * @details The allowed values of \p phi are the set of UQ0.16 values in the discrete range [0.0; 1.0-1/2^16] with
+ *  resolution of 1/2^16. This range is scaled to the floating point range [0; 2*pi) with resolution of pi/2^15 radian:
+ *  | phase, radian  | fixed point value  | container code |
+ *  |----------------|--------------------|----------------|
+ *  | 2*pi           | not allowed (*)    | not allowed    |
+ *  | 2*pi - pi/2^15 | 0.9999847412109375 | 0xFFFF         |
+ *  | 3*pi/2         | 0.75               | 0xC000         |
+ *  | pi             | 0.5                | 0x8000         |
+ *  | pi/2           | 0.25               | 0x4000         |
+ *  | pi/2^15        | 0.0000152587890625 | 0x0001         |
+ *  | 0              | 0.0                | 0x0000         |
+ * @note    Values of the phase outside the domain range [0; 2*pi) radians shall be projected into the domain with the
+ *  formula phi = phase-2*pi*k, where k is an integer.
+ */
+extern void gen_set_phi(struct gen_descr_t * const pgen, const uq016_t phi);
+
+/**@brief   Assigns the generator output attenuation.
+ * @param[in,out]   pgen    -- pointer to a generator descriptor object.
+ * @param[in]       att     -- a new value of the output signal momentary attenuation.
+ * @details The allowed values of \p att are the set of UQ0.16 values in the discrete range [0.0; 1.0-1/2^16] with
+ *  resolution of 1/2^16. This range corresponds to the floating point range [0; 1) with resolution of 1/2^16:
+ *  | attenuation | fixed point value  | container code |
+ *  |-------------|--------------------|----------------|
+ *  | 1           | not allowed (*)    | not allowed    |
+ *  | 1 - 1/2^16  | 0.9999847412109375 | 0xFFFF         |
+ *  | 0.75        | 0.75               | 0xC000         |
+ *  | 0.5         | 0.5                | 0x8000         |
+ *  | 1/2^16      | 0.0000152587890625 | 0x0001         |
+ *  | 0           | 0.0                | 0x0000         |
+ * @note    The attenuation factor value 1 exactly, which cannot be represented as a UQ0.16 value, shall be substituted
+ *  with 1-1/2^16. Indeed, as soon as the returned value of the function is of the type SQ0.15, which has smaller
+ *  resolution 1/2^15 than the \p att, the output signal will be constantly 0 when \p att is specified as 1-1/2^16 as
+ *  well as it would be specified as 1 exactly.
+ */
+extern void gen_set_att(struct gen_descr_t * const pgen, const uq016_t att);
+
+/**@brief   Returns the generator momentary output.
+ * @param[in]   pgen    -- pointer to a generator descriptor object.
+ * @return  Momentary amplitude of the generated signal.
+ * @details The output signal produced by the generator is described with the formula:
+ *  - u(t) = sin(2*pi*Fo/Fs*t + phi0) * (1-att), where:
+ *  - Fo    -- the oscillator frequency, Hertz.
+ *  - Fs    -- the sampling frequency, Hertz.
+ *  - phi0  -- the oscillator initial phase, radians.
+ *  - att   -- the momentary attenuation.
+ *  - t     -- the current moment of time, in terms of sampling frequency periods.
+ * @details This function shall be called each time the applications needs to evaluate the current level of the
+ *  generator output signal. Generally this function is called each sampling period before the generator state is
+ *  propagated with the \c gen_step function, or the generator attributes are reassigned with functions \c gen_set_xxx.
+ * @details The codomain of the generator output signal levels is the set of SQ0.15 values in the discrete range
+ *  [-1.0; +1.0-1/2^15] with resolution of 1/2^15. This range corresponds to the floating point range [-1; +1) with
+ *  resolution of 1/2^15:
+ *  | amplitude   | fixed point value  | container code |
+ *  |-------------|--------------------|----------------|
+ *  | +1          | not reachable (*)  | not reachable  |
+ *  | +1 - 1/2^15 | +0.999969482421875 | 0x7FFF         |
+ *  | +0.75       | +0.75              | 0x6000         |
+ *  | +0.5        | +0.5               | 0x4000         |
+ *  | +1/2^15     | +0.000030517578125 | 0x0001         |
+ *  |  0          |  0.0               | 0x0000         |
+ *  | -1/2^15     | -0.000030517578125 | 0x7FFF         |
+ *  | -0.5        | -0.5               | 0xC000         |
+ *  | -1 + 1/2^15 | -0.999969482421875 | 0x8001         |
+ *  | -1          | -1.0               | 0x8000         |
+ * @note    The momentary amplitude value +1 exactly, which cannot be represented as a SQ0.15 value, is substituted with
+ *  1-1/2^15.
+ */
+extern sq015_t gen_output(const struct gen_descr_t * const pgen);
+
+/**@brief   Propagates the generator state for one sampling step.
+ * @param[in,out]   pgen    -- pointer to a generator descriptor object.
+ * @details Each time this function is called the current phase of the oscillator is incremented by 2*pi*Fo/Fs radians.
+ * @note    For the generator to work properly this function shall be called exactly one time per each sampling period.
+ */
+extern void gen_step(struct gen_descr_t * const pgen);
 /**@}*/
 
-
-
-
-/**
- * \brief   The effective width of the fixed point code representing the momentary phase of the generator, Pw, in bits.
- */
-#define PHASE_CODE_WIDTH    (16)
-
-/* Validate the Pw value. */
-#if !(10 <= (PHASE_CODE_WIDTH - 1) && PHASE_CODE_WIDTH <= DSP_INT16_WIDTH)
-#   error   Value of Pw is out of the valid range.
-#endif
-
-/**
- * \name    Set of derivative parameters of the integer code representing the momentary phase of the generator.
- * \details For needs of DSP algorithms the momentary phase is represented as a signed integer value in the range
- *  from -2^(Pw-1) to +2^(Pw-1)-1, where Pw is the width of the integer code representing the momentary phase.
- * \details Special notation is introduced for this range: Pmin = -2^(Pw-1), Pmax = +2^(Pw-1)-1, Ps = 2^Pw. According to
- *  these the momentary phase code belongs to the range from Pmin to Pmax inclusively and provides Ps different codes.
- * \details The momentary phase code Pmin corresponds to -pi radians; code Pmax+1 corresponds to +pi radians; code Pmax
- *  corresponds to (+pi - 2*pi/Ps) radians; code 0 corresponds to 0 radians.
- * \details The phase code span Ps corresponds to one whole period 2*pi radian of the generated frequency Fo; the phase
- *  code single unit corresponds to 2*pi/Ps radians.
- * \details Generator increments the momentary phase code by one unit at each sampling tick when it is generating the
- *  lowest supported frequency Fo_min. For higher frequencies Fo = (Fo_min * k) the momentary phase code is incremented
- *  by k units at each sampling tick - the same value k is used between all ticks, rational values are not used.
- */
-/**@{*/
-/** Span of the momentary phase integer code, Ps. */
-#define PHASE_CODE_SPAN     (1 << PHASE_CODE_WIDTH)
-/** Minimum value of the momentary phase integer code, Pmin. */
-#define PHASE_CODE_MIN      (-PHASE_CODE_SPAN/2)
-/** Maximum value of the momentary phase integer code, Pmax. */
-#define PHASE_CODE_MAX      (+PHASE_CODE_SPAN/2 - 1)
-/**@}*/
-
-/**
- * \brief   The binary order of magnitude of the generated frequencies series step, Ks.
- * \details Generator is able to produce the series of frequencies Fo_k = (k * Fo_min), where k is a natural number, and
- *  Fo_min is the lowest supported frequency. Value of k is limited only by the chosen sampling frequency.
- * \details From the formula it follows that Fo_min plays also the role of the common difference of successive members
- *  in the Fo_k series - i.e., the step of the frequencies series Fo_min = Fo_step. Assuming this fact the following
- *  holds Fo_k = (k * Fo_step).
- * \details This implementation requires Fo_step be an integer power of two. It may be expressed in terms of Ks as
- *  Fo_step = 2^Ks. Consequently members of the generated frequencies series may be expressed as Fo_k = (k * 2^Ks). And
- *  for the lowest generated frequency it holds Fo_min = 1 * 2^Ks = 2^Ks.
- * \details Theoretically Ks may have arbitrary integer value (zero, positive or negative) and is restricted only by the
- *  actual hardware capabilities. For example, zero value of Ks defines Fo_step and Fo_min both equal to 1 Hz.
- * \details If it is required for the Fo_step to be a fraction of 1 Hz, the appropriate negative value of Ks shall be
- *  taken. However, reducing the Fo_step more than actually required is not expedient as soon as with the phase span
- *  Ps already bounded above with the width of the integer data type it will be necessary to reduce the sampling rate
- *  which in turn will lower the upper limit of the generated frequency (restrict the maximum k in Fo_k expression).
- */
-#define FREQ_STEP_ORDER     (0)
-
-/**
- * \name    Set of macro functions performing multiplication on and division by the frequencies series step F_step.
- * \param[in]   x   The first multiplier or dividend.
- * \return  Product or quotient.
- */
-/**@{*/
-/** Multiplies on the frequencies series step. */
-#define MUL_FREQ_STEP(x)    (FREQ_STEP_ORDER == 0 ? (x) : FREQ_STEP_ORDER > 0 ?\
-                                    (x) << FREQ_STEP_ORDER : (x) >> -FREQ_STEP_ORDER)
-/** Divides by the frequencies series step. */
-#define DIV_FREQ_STEP(x)    (FREQ_STEP_ORDER == 0 ? (x) : FREQ_STEP_ORDER > 0 ?\
-                                    (x) >> FREQ_STEP_ORDER : (x) << -FREQ_STEP_ORDER)
-/**@}*/
-
-/**
- * \brief   Sampling rate (sampling frequency), Fs, in Hertz.
- * \details At the lowest supported frequency Fo_min generator increments the momentary phase namely by one unit at each
- *  sampling tick, so to cover a single period of Fo_min the phase shall be propagated Ps times. Single period of Fo_min
- *  by definition has duration of 1/Fo_min seconds, and this period shall comprise Ps sampling ticks (or periods of Fs).
- *  It means that 1 second embraces exactly Ps*Fo_min periods of Fs, and consequently Fs = (Ps * Fo_min).
- * \details Using equation Fo_min = 2^Ks, finally come with the formula Fs = (Ps * 2^Ks), where Ps is the phase span,
- *  Ks is the binary order of magnitude of the generated frequencies series step, and Fs value is in Hertz.
- * \note    The generator hardware shall be configured properly to actually achieve the declared sampling rate Fs.
- */
-#define SAMPLING_RATE_HZ    (MUL_FREQ_STEP(PHASE_CODE_SPAN))
-
-/**
- * \name    Set of derivative restrictions on the generated frequencies range and series.
- * \details The generated frequencies series step is expressed with the formula Fo_step = 2^Ks, where Ks is the binary
- *  order of magnitude of the generated frequencies series step.
- * \details The lowest generated frequency is expressed with the formula Fo_min = Fo_step.
- * \details The highest generated frequency is expressed with the formula Fo_max = Fs/2, where Fs is the sampling rate.
- * \note    These constants shall be used by the application for specifying proper tasks to the generator.
- */
-/**@{*/
-/** The generated frequencies series step, Fo_step, in Hertz. */
-#define FREQ_STEP       (1 << FREQ_STEP_ORDER)
-/** The lowest generated frequency, Fo_min, in Hertz. */
-#define FREQ_MIN        (FREQ_STEP)
-/** The highest generated frequency, Fo_max, in Hertz. */
-#define FREQ_MAX        (SAMPLING_RATE_HZ / 2)
-/**@}*/
-
-/**
- * \brief   Returns generator momentary output for each single sampling tick and propagates the generator state.
- * \param[in]   k_fo    Natural value of k from the expression Fo = (k * F_step), where Fo is the desired frequency to
- *  be generated, and F_step is the frequency step. Both Fo and Fs are expressed in Hertz.
- * \return  Momentary amplitude of the generated signal, integer value.
- * \details When this function is called it calculates the generator output sample for the current momentary phase, then
- *  propagates the momentary phase, and finally returns the calculated sample value. The very first time this function
- *  is called it returns 0 as soon as the generator phase is initially set to 0 radians.
- * \details Function returns integer values in the range from -(2^15-1) to +(2^15-1), which corresponds to the range
- *  from -Va to +Va, where Va is the maximum possible amplitude of the generated signal; zero value corresponds to 0.
- * \details Application is allowed to change Fo at arbitrary moment when calling this function, generator will produce
- *  phase correct output wave. The new value of Fo is accepted starting from the current moment and affects the value
- *  returned by this function when it is called next times.
- * \note    For correct operation Fo must not exceed Fo_max = Fs/2 at least, where Fs is the sampling rate.
- */
-extern dsp_int16_t geni(const dsp_uint16_t k_fo);
+/*--------------------------------------------------------------------------------------------------------------------*/
 
 #endif /* SINEGEN_H */
