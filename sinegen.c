@@ -23,47 +23,78 @@ static ui16_t sqrt_ui16(const ui16_t x);
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Initializes a sine wave generator. */
 void gen_init(struct gen_descr_t * const pgen) {
+
     assert(pgen != NULL);
+
     pgen->freq = 0;
     pgen->phi = 0;
     pgen->att = 0;
+
     gen_pp_restart(pgen);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Assigns the generator frequency. */
 void gen_set_freq(struct gen_descr_t * const pgen, const uq016_t freq) {
+
     assert(pgen != NULL);
     assert(freq <= 0x4000);
+
     pgen->freq = freq;
+
     gen_pp_restart(pgen);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Assigns the generator phase. */
 void gen_set_phi(struct gen_descr_t * const pgen, const uq016_t phi) {
+
     assert(pgen != NULL);
+
     pgen->phi = phi;
+
     gen_pp_restart(pgen);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Assigns the generator output attenuation. */
 void gen_set_att(struct gen_descr_t * const pgen, const uq016_t att) {
+
     assert(pgen != NULL);
+
     pgen->att = att;
+
     gen_pp_restart(pgen);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Returns the generator momentary output. */
 sq015_t gen_output(const struct gen_descr_t * const pgen) {
+
+    ui16_t  midx;       /* Modified index of the current sample within the interval excluding the additional step. */
+    ui16_t  istep;      /* Index of the current main step. Valid only if sidx is inside one of main steps. */
+    ui16_t  iidx;       /* Relative index of the current sample within the current main step. */
+    ui16_t  pidx;       /* Relative index of the current sample within the pattern of the current main step. */
+
     assert(pgen != NULL);
-    if (pgen->pp) {
-        return pgen->val0;      /* TODO: Perform interpolation between val0 and val1. */
-    } else {
+
+    if (pgen->pp == 0 || pgen->steps == 0) {
         return pgen->val0;
     }
+
+    if (pgen->sidx >= pgen->aidx && pgen->sidx < pgen->ridx) {
+        return (pgen->sidx - pgen->aidx) & 1 ? pgen->val0 : pgen->val1;
+    }
+
+    midx = pgen->sidx;
+    if (pgen->sidx >= pgen->ridx) {
+        midx -= pgen->asize;
+    }
+    istep = midx / pgen->msize;     /* 'istep' gives also the number of 'val1' in the pattern of the current step. */
+    iidx = midx % pgen->msize;
+    pidx = iidx % pgen->steps;      /* 'steps' stays also for the length of the pattern in each main step. */
+
+    return pidx >= istep ? pgen->val0 : pgen->val1;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -77,6 +108,7 @@ void gen_step(struct gen_descr_t * const pgen) {
     }
 
     pgen->phi += pgen->freq;
+    ++(pgen->sidx);
 
     if (pgen->pp && pgen->phi == pgen->phi1) {
         pgen->phi0 = pgen->phi1;
@@ -84,13 +116,15 @@ void gen_step(struct gen_descr_t * const pgen) {
         pgen->pp = 0;
     }
 
-    if (pgen->pp == 0)
+    if (pgen->pp == 0) {
         gen_pp_lookahead(pgen);
+    }
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /**@cond false*/
 void gen_pp_restart(struct gen_descr_t * const pgen) {
+
     assert(pgen != NULL);
 
     pgen->phi0 = pgen->phi;
@@ -107,19 +141,18 @@ void gen_pp_restart(struct gen_descr_t * const pgen) {
 /**@cond false*/
 void gen_pp_lookahead(struct gen_descr_t * const pgen) {
 
-    sq015_t dval;
-    ui16_t  cnt;
+    sq015_t dval;       /* Difference between val1 and val0. Valid only if both values are defined. */
 
     assert(pgen != NULL);
     assert(pgen->freq > 0 && pgen->freq <= 0x4000);
     assert(pgen->pp == 0);
 
     pgen->phi1 = pgen->phi0;
-    cnt = 0;
+    pgen->sampl = 0;
     while (1) {     /* TODO: Use binary search, or use arcsin to find phi1. */
         pgen->phi1 += pgen->freq;
-        ++cnt;
-        if (pgen->phi1 - pgen->phi0 >= 0x4000 || cnt >= 0x4000) {
+        ++(pgen->sampl);
+        if (pgen->phi1 - pgen->phi0 >= 0x4000 || pgen->sampl >= 0x4000) {
             return;
         }
         pgen->val1 = msin_sq015(pgen->phi1, pgen->att);
@@ -135,9 +168,15 @@ void gen_pp_lookahead(struct gen_descr_t * const pgen) {
         return;
     }
 
-    pgen->steps = sqrt_ui16(cnt);
+    pgen->steps = sqrt_ui16(pgen->sampl);
     if (pgen->steps < 2) {
         pgen->steps = 0;
+    } else {
+        pgen->msize = pgen->sampl / pgen->steps;
+        pgen->asize = pgen->sampl % pgen->steps;
+        pgen->sidx = 0;
+        pgen->ridx = pgen->sampl - (pgen->steps / 2) * pgen->msize;
+        pgen->aidx = pgen->ridx - pgen->asize;
     }
 }
 /**@endcond*/
@@ -165,7 +204,7 @@ ui16_t sqrt_ui16(const ui16_t x) {
         14400/*120*/, 14641/*121*/, 14884/*122*/, 15129/*123*/, 15376/*124*/, 15625/*125*/, 15876/*126*/, 16129/*127*/,
     };
 
-    ui16_t key;
+    ui16_t key;     /* Key into the square lookup table. */
 
     assert(x < 0x4000);
 

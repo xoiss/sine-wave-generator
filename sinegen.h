@@ -29,6 +29,12 @@ struct gen_descr_t {
     uq016_t phi1;       /**< Momentary phase of the oscillator at the end of the postprocessing interval. */
     sq015_t val1;       /**< Momentary amplitude of the output signal at the end of the postprocessing interval. */
     ui16_t  steps;      /**< Number of steps between val0 and val1 on the interval from phi0 to phi1; 0 if disabled. */
+    ui16_t  sampl;      /**< Number of samples between phi0 to phi1; 0 if disabled. */
+    ui16_t  msize;      /**< Size of the main steps of the pattern, in samples. */
+    ui16_t  asize;      /**< Size of the additional step of the pattern, in samples. */
+    ui16_t  sidx;       /**< Index of the current sample within the interval from phi0 to phi1, starting with 0. */
+    ui16_t  ridx;       /**< The first index within the first right-hand step of the pattern. */
+    ui16_t  aidx;       /**< The first index within the additional step of the pattern. */
 };
 
 /*--------------------------------------------------------------------------------------------------------------------*/

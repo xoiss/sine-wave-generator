@@ -1,0 +1,85 @@
+sampl   steps   msize   asize   aidx    ridx    pattern
+
+4       2       2       0       2       2       ..--..
+5       2       2       1       2       3       ..-*-..
+6       2       3       0       3       3       ...--...
+7       2       3       1       3       4       ...-*-...
+8       2       4       0       4       4       ....--....
+
+9       3       3       0       6       6       ...-...--...
+10      3       3       1       6       7       ...-...-*-...
+11      3       3       2       6       8       ...-...-**-...
+12      3       4       0       8       8       ....-....--....
+13      3       4       1       8       9       ....-....-*-....
+14      3       4       2       8       10      ....-....-**-....
+15      3       5       0       10      10      .....-.....--.....
+
+16      4       4       0       8       8       ....-....--....-....
+17      4       4       1       8       9       ....-....-*-....-....
+18      4       4       2       8       10      ....-....-**-....-....
+19      4       4       3       8       11      ....-....-***-....-....
+20      4       5       0       10      10      .....-.....--.....-.....
+21      4       5       1       10      11      .....-.....-*-.....-.....
+22      4       5       2       10      12      .....-.....-**-.....-.....
+23      4       5       3       10      13      .....-.....-***-.....-.....
+24      4       6       0       12      12      ......-......--......-......
+
+25      5       5       0       15      15      .....-.....-.....--.....-.....
+26      5       5       1       15      16      .....-.....-.....-*-.....-.....
+
+
+sampl   steps   msize   asize   aidx    ridx    pattern
+
+4       2       2       0       2       2       aa--ba
+5       2       2       1       2       3       aa-b-ba
+6       2       3       0       3       3       aaa--bab
+7       2       3       1       3       4       aaa-b-bab
+8       2       4       0       4       4       aaaa--baba
+
+9       3       3       0       6       6       aaa-baa--bba
+10      3       3       1       6       7       aaa-baa-b-bba
+11      3       3       2       6       8       aaa-baa-ba-bba
+12      3       4       0       8       8       aaaa-baab--bbab
+13      3       4       1       8       9       aaaa-baab-b-bbab
+14      3       4       2       8       10      aaaa-baab-ba-bbab
+15      3       5       0       10      10      aaaaa-baaba--bbabb
+
+16      4       4       0       8       8       aaaa-baaa--bbaa-bbba
+17      4       4       1       8       9       aaaa-baaa-b-bbaa-bbba
+18      4       4       2       8       10      aaaa-baaa-ba-bbaa-bbba
+19      4       4       3       8       11      aaaa-baaa-bab-bbaa-bbba
+20      4       5       0       10      10      aaaaa-baaab--bbaab-bbbab
+21      4       5       1       10      11      aaaaa-baaab-b-bbaab-bbbab
+22      4       5       2       10      12      aaaaa-baaab-ba-bbaab-bbbab
+23      4       5       3       10      13      aaaaa-baaab-bab-bbaab-bbbab
+24      4       6       0       12      12      aaaaaa-baaaba--bbaabb-bbbabb
+
+25      5       5       0       15      15      aaaaa-baaaa-bbaaa--bbbaa-bbbba
+26      5       5       1       15      16      aaaaa-baaaa-bbaaa-b-bbbaa-bbbba
+
+
+sampl   steps   msize   asize   aidx    ridx    pattern
+
+4       2       2       0       2       2       aaba
+5       2       2       1       2       3       aabba
+6       2       3       0       3       3       aaabab
+7       2       3       1       3       4       aaabbab
+8       2       4       0       4       4       aaaababa
+9       3       3       0       6       6       aaabaabba
+10      3       3       1       6       7       aaabaabbba
+11      3       3       2       6       8       aaabaababba
+12      3       4       0       8       8       aaaabaabbbab
+13      3       4       1       8       9       aaaabaabbbbab
+14      3       4       2       8       10      aaaabaabbabbab
+15      3       5       0       10      10      aaaaabaababbabb
+16      4       4       0       8       8       aaaabaaabbaabbba
+17      4       4       1       8       9       aaaabaaabbbaabbba
+18      4       4       2       8       10      aaaabaaababbaabbba
+19      4       4       3       8       11      aaaabaaababbbaabbba
+20      4       5       0       10      10      aaaaabaaabbbaabbbbab
+21      4       5       1       10      11      aaaaabaaabbbbaabbbbab
+22      4       5       2       10      12      aaaaabaaabbabbaabbbbab
+23      4       5       3       10      13      aaaaabaaabbabbbaabbbbab
+24      4       6       0       12      12      aaaaaabaaababbaabbbbbabb
+25      5       5       0       15      15      aaaaabaaaabbaaabbbaabbbba
+26      5       5       1       15      16      aaaaabaaaabbaaabbbbaabbbba
