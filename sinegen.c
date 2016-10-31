@@ -29,6 +29,7 @@ void gen_init(struct gen_descr_t * const pgen) {
     pgen->freq = 0;
     pgen->phi = 0;
     pgen->att = 0;
+    pgen->en = 0;
 
     gen_pp_restart(pgen);
 }
@@ -68,6 +69,17 @@ void gen_set_att(struct gen_descr_t * const pgen, const uq016_t att) {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+/* Enables or disables the postprocessing on the generator output. */
+void gen_set_pp(struct gen_descr_t * const pgen, const bool_t en) {
+
+    assert(pgen != NULL);
+
+    pgen->en = en;
+
+    gen_pp_restart(pgen);
+}
+
+/*--------------------------------------------------------------------------------------------------------------------*/
 /* Returns the generator momentary output. */
 sq015_t gen_output(const struct gen_descr_t * const pgen) {
 
@@ -77,6 +89,10 @@ sq015_t gen_output(const struct gen_descr_t * const pgen) {
     ui16_t  pidx;       /* Relative index of the current sample within the pattern of the current main step. */
 
     assert(pgen != NULL);
+
+    if (pgen->en == 0) {
+        return msin_sq015(pgen->phi, pgen->att);
+    }
 
     if (pgen->pp == 0 || pgen->steps == 0) {
         return pgen->val0;
@@ -115,7 +131,6 @@ void gen_step(struct gen_descr_t * const pgen) {
         pgen->val0 = pgen->val1;
         pgen->pp = 0;
     }
-
     if (pgen->pp == 0) {
         gen_pp_lookahead(pgen);
     }
@@ -146,6 +161,10 @@ void gen_pp_lookahead(struct gen_descr_t * const pgen) {
     assert(pgen != NULL);
     assert(pgen->freq > 0 && pgen->freq <= 0x4000);
     assert(pgen->pp == 0);
+
+    if (pgen->en == 0) {
+        return;
+    }
 
     pgen->phi1 = pgen->phi0;
     pgen->sampl = 0;

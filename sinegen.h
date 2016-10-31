@@ -25,7 +25,8 @@ struct gen_descr_t {
     /* Postprocessor state and attributes. */
     uq016_t phi0;       /**< Momentary phase of the oscillator at the start of the postprocessing interval. */
     sq015_t val0;       /**< Momentary amplitude of the output signal at the start of the postprocessing interval. */
-    bool_t  pp;         /**< Equals to 1 if the postprocessing is enabled; 0 otherwise. */
+    bool_t  en;         /**< Equals to 1 if the postprocessing is enabled; 0 otherwise. */
+    bool_t  pp;         /**< Equals to 1 if the postprocessing is allowed; 0 otherwise. */
     uq016_t phi1;       /**< Momentary phase of the oscillator at the end of the postprocessing interval. */
     sq015_t val1;       /**< Momentary amplitude of the output signal at the end of the postprocessing interval. */
     ui16_t  steps;      /**< Number of steps between val0 and val1 on the interval from phi0 to phi1; 0 if disabled. */
@@ -105,6 +106,12 @@ extern void gen_set_phi(struct gen_descr_t * const pgen, const uq016_t phi);
  *  well as it would be specified as 1 exactly.
  */
 extern void gen_set_att(struct gen_descr_t * const pgen, const uq016_t att);
+
+/**@brief   Enables or disables the postprocessing on the generator output.
+ * @param[in,out]   pgen    -- pointer to a generator descriptor object.
+ * @param[in]       en      -- if 0, disables postprocessing; otherwise enables it.
+ */
+extern void gen_set_pp(struct gen_descr_t * const pgen, const bool_t en);
 
 /**@brief   Returns the generator momentary output.
  * @param[in]   pgen    -- pointer to a generator descriptor object.
