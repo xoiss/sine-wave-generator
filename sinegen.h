@@ -18,9 +18,17 @@
 /**@brief   Data structure for a sine wave generator descriptor.
  */
 struct gen_descr_t {
+    /* Oscillator state and attributes. */
     uq016_t freq;       /**< Frequency of the oscillator. */
     uq016_t phi;        /**< Momentary phase of the oscillator. */
     uq016_t att;        /**< Momentary attenuation of the output signal. */
+    /* Postprocessor state and attributes. */
+    uq016_t phi0;       /**< Momentary phase of the oscillator at the start of the postprocessing interval. */
+    sq015_t val0;       /**< Momentary amplitude of the output signal at the start of the postprocessing interval. */
+    bool_t  pp;         /**< Equals to 1 if the postprocessing is enabled; 0 otherwise. */
+    uq016_t phi1;       /**< Momentary phase of the oscillator at the end of the postprocessing interval. */
+    sq015_t val1;       /**< Momentary amplitude of the output signal at the end of the postprocessing interval. */
+    ui16_t  steps;      /**< Number of steps between val0 and val1 on the interval from phi0 to phi1; 0 if disabled. */
 };
 
 /*--------------------------------------------------------------------------------------------------------------------*/
@@ -39,7 +47,7 @@ extern void gen_init(struct gen_descr_t * const pgen);
 /**@brief   Assigns the generator frequency.
  * @param[in,out]   pgen    -- pointer to a generator descriptor object.
  * @param[in]       freq    -- a new value of the oscillator frequency in terms of the sampling frequency - i.e., the
- *  ratio Fo/Fs, where Fo is the oscillator fequency and Fs is the sampling frequency, both in Hertz.
+ *  ratio Fo/Fs, where Fo is the oscillator fequency and Fs is the sampling frequency, both in hertz.
  * @details The allowed values of \p freq are the subset of UQ0.16 values in the discrete range [0.0; 0.25] with
  *  resolution of 1/2^16. This range corresponds to the floating point range [0; 0.25] with resolution of 1/2^16:
  *  | Fo/Fs         | fixed point value  | container code |
@@ -97,8 +105,8 @@ extern void gen_set_att(struct gen_descr_t * const pgen, const uq016_t att);
  * @return  Momentary amplitude of the generated signal.
  * @details The output signal produced by the generator is described with the formula:
  *  - u(t) = sin(2*pi*Fo/Fs*t + phi0) * (1-att), where:
- *  - Fo    -- the oscillator frequency, Hertz.
- *  - Fs    -- the sampling frequency, Hertz.
+ *  - Fo    -- the oscillator frequency, hertz.
+ *  - Fs    -- the sampling frequency, hertz.
  *  - phi0  -- the oscillator initial phase, radians.
  *  - att   -- the momentary attenuation.
  *  - t     -- the current moment of time, in terms of sampling frequency periods.

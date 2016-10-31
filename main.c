@@ -28,7 +28,7 @@
 
 /**@brief   The number of periods of Fo to produce.
  */
-#define FO_CYCLES   1
+#define FO_CYCLES   2
 
 /*--------------------------------------------------------------------------------------------------------------------*/
 /**@brief   Performs the sine wave generation and saves the data.
@@ -77,6 +77,7 @@ int main(void) {
     }
 
     run(fo, &gen, FO_CYCLES);
+
     fclose(fo);
 
     return EXIT_SUCCESS;
