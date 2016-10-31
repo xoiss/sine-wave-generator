@@ -1,0 +1,27 @@
+var fixtypes_8h =
+[
+    [ "SQ015_BIT", "fixtypes_8h.html#a8699f6cd85912ed6f92dffb704aa46d2", null ],
+    [ "SQ015_FRAC", "fixtypes_8h.html#a655023337012c6ed8da073d75b23637e", null ],
+    [ "SQ021_BIT", "fixtypes_8h.html#af1c17ace226251baf165c4e82fc5fd0d", null ],
+    [ "SQ021_FRAC", "fixtypes_8h.html#ad03b2d423344b7adacbc052402f905b9", null ],
+    [ "UQ016_BIT", "fixtypes_8h.html#acdbf50f1a4a2b596962a1eb403cb8fd6", null ],
+    [ "UQ016_FRAC", "fixtypes_8h.html#ad564f7edb65613d2f6d53de5b6960581", null ],
+    [ "UQ022_BIT", "fixtypes_8h.html#a0cea24978b917343bb1f3113c2878bd8", null ],
+    [ "UQ022_FRAC", "fixtypes_8h.html#a6736ec193fd5cdd260c3a4c29365cada", null ],
+    [ "UQ121_BIT", "fixtypes_8h.html#ae0e5208abcb385c72db4fbd2cbc55578", null ],
+    [ "UQ121_FRAC", "fixtypes_8h.html#a863c6c44cdf0fc31a346c3c8003b330f", null ],
+    [ "sq015_t", "fixtypes_8h.html#aefba095c7857ee32651a246069b3c1d2", null ],
+    [ "sq021_t", "fixtypes_8h.html#a752f0b8a3feaf3f3f611495a87dc26c8", null ],
+    [ "uq016_t", "fixtypes_8h.html#aa293f684413bb5a76a10a54eb331c4fa", null ],
+    [ "uq022_t", "fixtypes_8h.html#a99353743403d9377bc436766f0512818", null ],
+    [ "uq121_t", "fixtypes_8h.html#ac7176cd544bd9f7fec02520aa73948dd", null ],
+    [ "sq015_from_sq021", "fixtypes_8h.html#a9eb5848ef183d5a56d68cb3cf907579c", null ],
+    [ "sq015_from_uq016", "fixtypes_8h.html#a8da5cad4db40f9a2779f1e1e5482da10", null ],
+    [ "sq021_from_sq015", "fixtypes_8h.html#a6c2b9be2c6e5d7f7c5ad8ec14d3ce343", null ],
+    [ "sq021_from_uq022", "fixtypes_8h.html#a6307980705864feeedcefc0b5f79803d", null ],
+    [ "uq016_from_sq015", "fixtypes_8h.html#a44d4d542c11f792dd352f1336eb7e3d5", null ],
+    [ "uq016_from_uq022", "fixtypes_8h.html#a0b4a1fddfffecf8b982593d89b935f47", null ],
+    [ "uq022_from_sq021", "fixtypes_8h.html#ab6f8b2307b626cad600f9b840324ddce", null ],
+    [ "uq022_from_uq016", "fixtypes_8h.html#a80ece7db2c62254719305b72511d9eef", null ],
+    [ "uq121_from_uq016", "fixtypes_8h.html#a88522fe0e6ce0f2c1e0e2f387098f313", null ]
+];
