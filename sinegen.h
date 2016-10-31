@@ -24,11 +24,13 @@ struct gen_descr_t {
     uq016_t att;        /**< Momentary attenuation of the output signal. */
     /* Postprocessor state and attributes. */
     uq016_t phi0;       /**< Momentary phase of the oscillator at the start of the postprocessing interval. */
-    sq015_t val0;       /**< Momentary amplitude of the output signal at the start of the postprocessing interval. */
+    sq015_t val0;       /**< Momentary amplitude of the output signal at phi0. */
     bool_t  en;         /**< Equals to 1 if the postprocessing is enabled; 0 otherwise. */
     bool_t  pp;         /**< Equals to 1 if the postprocessing is allowed; 0 otherwise. */
-    uq016_t phi1;       /**< Momentary phase of the oscillator at the end of the postprocessing interval. */
-    sq015_t val1;       /**< Momentary amplitude of the output signal at the end of the postprocessing interval. */
+    uq016_t phi1;       /**< Momentary phase of the oscillator at the left-end of the postprocessing interval. */
+    sq015_t val1;       /**< Momentary amplitude of the output signal at phi1. */
+    uq016_t phi2;       /**< Momentary phase of the oscillator at the right-end of the postprocessing interval. */
+    sq015_t val2;       /**< Momentary amplitude of the output signal at phi2. */
     ui16_t  steps;      /**< Number of steps between val0 and val1 on the interval from phi0 to phi1; 0 if disabled. */
     ui16_t  sampl;      /**< Number of samples between phi0 to phi1; 0 if disabled. */
     ui16_t  msize;      /**< Size of the main steps of the pattern, in samples. */

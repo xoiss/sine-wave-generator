@@ -90,12 +90,8 @@ sq015_t gen_output(const struct gen_descr_t * const pgen) {
 
     assert(pgen != NULL);
 
-    if (pgen->en == 0) {
+    if (pgen->pp == 0) {
         return msin_sq015(pgen->phi, pgen->att);
-    }
-
-    if (pgen->pp == 0 || pgen->steps == 0) {
-        return pgen->val0;
     }
 
     if (pgen->sidx >= pgen->aidx && pgen->sidx < pgen->ridx) {
@@ -126,7 +122,7 @@ void gen_step(struct gen_descr_t * const pgen) {
     pgen->phi += pgen->freq;
     ++(pgen->sidx);
 
-    if (pgen->pp && pgen->phi == pgen->phi1) {
+    if (pgen->pp && pgen->sidx == pgen->sampl) {
         pgen->phi0 = pgen->phi1;
         pgen->val0 = pgen->val1;
         pgen->pp = 0;
@@ -156,7 +152,8 @@ void gen_pp_restart(struct gen_descr_t * const pgen) {
 /**@cond false*/
 void gen_pp_lookahead(struct gen_descr_t * const pgen) {
 
-    sq015_t dval;       /* Difference between val1 and val0. Valid only if both values are defined. */
+    ui16_t  cnt1, cnt2;     /* Count samples to left- and right-ends of the postprocessing interval. */
+    sq015_t dval;           /* Difference between val1 and val0. Valid only if both values are defined. */
 
     assert(pgen != NULL);
     assert(pgen->freq > 0 && pgen->freq <= 0x4000);
@@ -167,30 +164,43 @@ void gen_pp_lookahead(struct gen_descr_t * const pgen) {
     }
 
     pgen->phi1 = pgen->phi0;
-    pgen->sampl = 0;
+    cnt1 = 0;
     while (1) {     /* TODO: Use binary search, or use arcsin to find phi1. */
         pgen->phi1 += pgen->freq;
-        ++(pgen->sampl);
-        if (pgen->phi1 - pgen->phi0 >= 0x4000 || pgen->sampl >= 0x4000) {
+        ++cnt1;
+        if (pgen->phi1 - pgen->phi0 >= 0x4000 || cnt1 >= 0x4000) {
             return;
         }
         pgen->val1 = msin_sq015(pgen->phi1, pgen->att);
         if (pgen->val1 != pgen->val0) {
-            pgen->pp = 1;
             break;
         }
     }
 
     dval = pgen->val1 - pgen->val0;
     if (dval < -1 || dval > 1) {
-        pgen->steps = 0;
         return;
     }
 
+    pgen->phi2 = pgen->phi1;
+    cnt2 = 0;
+    while (1) {     /* TODO: Use binary search, or use arcsin to find phi1. */
+        pgen->phi2 += pgen->freq;
+        ++cnt2;
+        if (pgen->phi2 - pgen->phi1 >= 0x4000 || cnt2 >= 0x4000) {
+            return;
+        }
+        pgen->val2 = msin_sq015(pgen->phi2, pgen->att);
+        if (pgen->val2 != pgen->val1) {
+            break;
+        }
+    }
+
+    pgen->sampl = cnt1 + cnt2 / 2;
     pgen->steps = sqrt_ui16(pgen->sampl);
-    if (pgen->steps < 2) {
-        pgen->steps = 0;
-    } else {
+    if (pgen->steps >= 2) {
+        pgen->pp = 1;
+        pgen->phi1 += cnt2 / 2 * pgen->freq;
         pgen->msize = pgen->sampl / pgen->steps;
         pgen->asize = pgen->sampl % pgen->steps;
         pgen->sidx = 0;
