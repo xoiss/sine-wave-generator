@@ -89,6 +89,7 @@ void gen_step(struct gen_descr_t * const pgen) {
 }
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+/**@cond false*/
 void gen_pp_restart(struct gen_descr_t * const pgen) {
     assert(pgen != NULL);
 
@@ -100,8 +101,10 @@ void gen_pp_restart(struct gen_descr_t * const pgen) {
         gen_pp_lookahead(pgen);
     }
 }
+/**@endcond*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+/**@cond false*/
 void gen_pp_lookahead(struct gen_descr_t * const pgen) {
 
     sq015_t dval;
@@ -137,8 +140,10 @@ void gen_pp_lookahead(struct gen_descr_t * const pgen) {
         pgen->steps = 0;
     }
 }
+/**@endcond*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
+/**@cond false*/
 ui16_t sqrt_ui16(const ui16_t x) {
 
     static const ui16_t sqr_lut[] = {
@@ -172,5 +177,6 @@ ui16_t sqrt_ui16(const ui16_t x) {
 
     return key - 1;
 }
+/**@endcond*/
 
 /*--------------------------------------------------------------------------------------------------------------------*/
